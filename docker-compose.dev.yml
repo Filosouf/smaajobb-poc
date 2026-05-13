@@ -1,0 +1,33 @@
+services:
+  # Azure SQL Edge - ARM-native SQL Server-kompatibel database for Apple Silicon
+  mssql:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    container_name: smaajobb-mssql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Local_dev_passord_2026!"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # smtp4dev - lokal SMTP-server med web-UI for å fange utgående e-post
+  smtp4dev:
+    image: rnwood/smtp4dev:latest
+    container_name: smaajobb-smtp4dev
+    ports:
+      - "3001:80"      # Web-UI på http://localhost:3001
+      - "2525:25"      # SMTP-port (bruker 2525 for å unngå konflikt med systemets 25)
+    volumes:
+      - smtp4dev-data:/smtp4dev
+
+volumes:
+  mssql-data:
+  smtp4dev-data:
