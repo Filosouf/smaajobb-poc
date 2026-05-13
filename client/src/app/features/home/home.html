@@ -1,0 +1,41 @@
+<div class="min-h-screen bg-slate-50">
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <h1 class="text-xl font-bold text-slate-900">SmåJobb</h1>
+      <div class="flex items-center gap-3 text-sm">
+        <span class="text-slate-600">
+          Hei, <span class="font-medium text-slate-900">{{ auth.currentUser()?.fullName }}</span>
+        </span>
+        <button
+          type="button"
+          (click)="logout()"
+          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+        >
+          Logg ut
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-8">
+    <div class="rounded-lg bg-white border border-slate-200 p-6">
+      <h2 class="text-lg font-semibold text-slate-900 mb-2">Velkommen!</h2>
+      <p class="text-sm text-slate-600">
+        Auth-fundamentet er på plass. Neste steg er jobblistinger, søknader og betaling.
+      </p>
+
+      @if (auth.currentUser(); as user) {
+        <dl class="mt-6 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+          <dt class="text-slate-500">E-post</dt>
+          <dd class="text-slate-900">{{ user.email }}</dd>
+          <dt class="text-slate-500">Alder</dt>
+          <dd class="text-slate-900">{{ user.age }} år</dd>
+          <dt class="text-slate-500">Brukertype</dt>
+          <dd class="text-slate-900">{{ user.userType === 'Adult' ? 'Voksen' : 'Mindreårig' }}</dd>
+          <dt class="text-slate-500">Fullførte jobber</dt>
+          <dd class="text-slate-900">{{ user.completedJobs }}</dd>
+        </dl>
+      }
+    </div>
+  </main>
+</div>

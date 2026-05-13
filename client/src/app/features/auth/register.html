@@ -1,0 +1,117 @@
+<div class="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-8">
+  <div class="w-full max-w-md">
+    <div class="mb-8 text-center">
+      <h1 class="text-3xl font-bold text-slate-900">SmåJobb</h1>
+      <p class="mt-2 text-sm text-slate-600">Opprett en konto</p>
+    </div>
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="bg-white shadow-sm rounded-lg p-6 space-y-4 border border-slate-200"
+    >
+      @if (errorMessage()) {
+        <div class="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <div>
+        <label for="fullName" class="block text-sm font-medium text-slate-700 mb-1">
+          Fullt navn
+        </label>
+        <input
+          id="fullName"
+          type="text"
+          formControlName="fullName"
+          autocomplete="name"
+          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label for="email" class="block text-sm font-medium text-slate-700 mb-1">
+          E-post
+        </label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-medium text-slate-700 mb-1">
+          Passord <span class="text-slate-500 font-normal">(minst 8 tegn, ett tall, en liten bokstav)</span>
+        </label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          autocomplete="new-password"
+          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label for="birthDate" class="block text-sm font-medium text-slate-700 mb-1">
+          Fødselsdato
+        </label>
+        <input
+          id="birthDate"
+          type="date"
+          formControlName="birthDate"
+          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label for="phoneNumber" class="block text-sm font-medium text-slate-700 mb-1">
+          Telefon <span class="text-slate-500 font-normal">(valgfritt)</span>
+        </label>
+        <input
+          id="phoneNumber"
+          type="tel"
+          formControlName="phoneNumber"
+          autocomplete="tel"
+          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label for="postalCode" class="block text-sm font-medium text-slate-700 mb-1">
+          Postnummer <span class="text-slate-500 font-normal">(valgfritt)</span>
+        </label>
+        <input
+          id="postalCode"
+          type="text"
+          formControlName="postalCode"
+          autocomplete="postal-code"
+          maxlength="4"
+          class="block w-32 rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="submitting()"
+        class="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        @if (submitting()) {
+          Oppretter konto ...
+        } @else {
+          Opprett konto
+        }
+      </button>
+
+      <p class="text-center text-sm text-slate-600">
+        Har du allerede konto?
+        <a routerLink="/login" class="font-medium text-blue-600 hover:text-blue-700">
+          Logg inn
+        </a>
+      </p>
+    </form>
+  </div>
+</div>
