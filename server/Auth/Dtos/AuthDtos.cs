@@ -27,3 +27,11 @@ public record UserDto(
     string UserType,
     decimal? AverageRating,
     int CompletedJobs);
+
+public record ForgotPasswordRequest(
+    [Required, EmailAddress] string Email);
+
+public record ResetPasswordRequest(
+    [Required, EmailAddress] string Email,
+    [Required] string Token,
+    [Required, MinLength(8)] string NewPassword);

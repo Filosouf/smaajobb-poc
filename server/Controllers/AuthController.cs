@@ -1,11 +1,15 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using SmaaJobb.Api.Auth;
 using SmaaJobb.Api.Auth.Dtos;
 using SmaaJobb.Api.Domain;
 using SmaaJobb.Api.Domain.Entities;
+using SmaaJobb.Api.Email;
 
 namespace SmaaJobb.Api.Controllers;
 
@@ -19,17 +23,26 @@ public class AuthController : ControllerBase
     private readonly IJwtTokenService _jwt;
     private readonly IRefreshTokenService _refresh;
     private readonly IWebHostEnvironment _env;
+    private readonly IEmailSender _email;
+    private readonly AppSettings _appSettings;
+    private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         UserManager<AppUser> userManager,
         IJwtTokenService jwt,
         IRefreshTokenService refresh,
-        IWebHostEnvironment env)
+        IWebHostEnvironment env,
+        IEmailSender email,
+        IOptions<AppSettings> appSettings,
+        ILogger<AuthController> logger)
     {
         _userManager = userManager;
         _jwt = jwt;
         _refresh = refresh;
         _env = env;
+        _email = email;
+        _appSettings = appSettings.Value;
+        _logger = logger;
     }
 
     [HttpPost("register")]
@@ -107,6 +120,62 @@ public class AuthController : ControllerBase
                 await _refresh.RevokeAsync(existing);
         }
         Response.Cookies.Delete(RefreshCookieName);
+        return NoContent();
+    }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest req)
+    {
+        var user = await _userManager.FindByEmailAsync(req.Email);
+
+        // Lekk ikke om e-posten finnes: returnér alltid 204
+        if (user is null)
+        {
+            _logger.LogInformation("Forgot-password request for unknown e-post {Email}", req.Email);
+            return NoContent();
+        }
+
+        var rawToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(rawToken));
+
+        var link = $"{_appSettings.FrontendBaseUrl.TrimEnd('/')}/reset-password"
+            + $"?email={Uri.EscapeDataString(req.Email)}"
+            + $"&token={encodedToken}";
+
+        var html = $@"
+            <p>Hei {System.Net.WebUtility.HtmlEncode(user.FullName)},</p>
+            <p>Vi har mottatt en forespørsel om å tilbakestille passordet ditt på SmåJobb.</p>
+            <p>Klikk på lenken nedenfor for å sette nytt passord. Lenken er gyldig i kort tid.</p>
+            <p><a href=""{link}"">Tilbakestill passord</a></p>
+            <p>Eller kopiér denne URL-en: <br/><code>{link}</code></p>
+            <p>Hvis du ikke har bedt om dette, kan du trygt ignorere e-posten.</p>
+            <p>Hilsen<br/>SmåJobb</p>";
+
+        await _email.SendAsync(req.Email, "Tilbakestill passordet ditt", html);
+        return NoContent();
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest req)
+    {
+        var user = await _userManager.FindByEmailAsync(req.Email);
+        if (user is null)
+            return BadRequest(new { error = "Ugyldig e-post eller token." });
+
+        string decodedToken;
+        try
+        {
+            decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(req.Token));
+        }
+        catch
+        {
+            return BadRequest(new { error = "Ugyldig token." });
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, decodedToken, req.NewPassword);
+        if (!result.Succeeded)
+            return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+
         return NoContent();
     }
 
