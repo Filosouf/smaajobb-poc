@@ -62,6 +62,7 @@ builder.Services.AddAuthorization();
 // --- App services ---
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+builder.Services.AddScoped<SmaaJobb.Api.Jobs.IJobService, SmaaJobb.Api.Jobs.JobService>();
 
 // --- CORS (dev only — prod serverer Angular og API fra samme origin) ---
 builder.Services.AddCors(options =>
@@ -73,7 +74,14 @@ builder.Services.AddCors(options =>
               .AllowCredentials());
 });
 
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(opt =>
+    {
+        opt.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
+
 builder.Services.AddOpenApi();
 
 var app = builder.Build();

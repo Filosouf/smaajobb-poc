@@ -1,0 +1,114 @@
+<div>
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-slate-900">{{ title() }}</h1>
+    <a
+      routerLink="/jobs/new"
+      class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+    >
+      Legg ut jobb
+    </a>
+  </div>
+
+  <form
+    [formGroup]="filterForm"
+    (ngSubmit)="refresh()"
+    class="bg-white border border-slate-200 rounded-lg p-4 mb-6 grid grid-cols-1 sm:grid-cols-5 gap-3"
+  >
+    <div class="sm:col-span-2">
+      <label class="block text-xs font-medium text-slate-700 mb-1">Kategori</label>
+      <select
+        formControlName="categoryId"
+        class="block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+      >
+        <option value="">Alle</option>
+        @for (c of categories(); track c.id) {
+          <option [value]="c.id">{{ c.name }}</option>
+        }
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-slate-700 mb-1">Postnummer</label>
+      <input
+        type="text"
+        formControlName="postalCode"
+        maxlength="4"
+        placeholder="5000"
+        class="block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+      />
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-slate-700 mb-1">Pris fra</label>
+      <input
+        type="number"
+        formControlName="minPrice"
+        min="0"
+        class="block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+      />
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-slate-700 mb-1">Pris til</label>
+      <input
+        type="number"
+        formControlName="maxPrice"
+        min="0"
+        class="block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+      />
+    </div>
+    <div class="sm:col-span-5 flex gap-2">
+      <button
+        type="submit"
+        class="rounded-md bg-slate-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-slate-800"
+      >
+        Filtrer
+      </button>
+      <button
+        type="button"
+        (click)="resetFilter()"
+        class="rounded-md border border-slate-300 px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+      >
+        Tilbakestill
+      </button>
+    </div>
+  </form>
+
+  @if (loading()) {
+    <p class="text-sm text-slate-500">Laster ...</p>
+  } @else if (error()) {
+    <p class="text-sm text-red-600">{{ error() }}</p>
+  } @else if (items().length === 0) {
+    <div class="bg-white border border-slate-200 rounded-lg p-8 text-center text-sm text-slate-600">
+      Ingen jobber matcher filtrene.
+    </div>
+  } @else {
+    <ul class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      @for (item of items(); track item.id) {
+        <li>
+          <a
+            [routerLink]="['/jobs', item.id]"
+            class="block bg-white border border-slate-200 rounded-lg p-4 hover:border-blue-400 hover:shadow-sm transition"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <h2 class="font-semibold text-slate-900 line-clamp-2">{{ item.title }}</h2>
+              <span
+                class="shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                [class]="statusClass(item.status)"
+              >
+                {{ statusLabel(item.status) }}
+              </span>
+            </div>
+            <p class="mt-1 text-xs text-slate-500">{{ item.categoryName }}</p>
+            <div class="mt-3 flex items-center justify-between text-sm">
+              <span class="font-medium text-slate-900">{{ priceLabel(item) }}</span>
+              <span class="text-slate-600">
+                {{ item.postalCode }}{{ item.city ? ' · ' + item.city : '' }}
+              </span>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">
+              Estimat: {{ item.estimatedHours }} t
+            </p>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</div>

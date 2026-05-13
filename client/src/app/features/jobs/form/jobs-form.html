@@ -1,0 +1,153 @@
+<div class="max-w-2xl">
+  <h1 class="text-2xl font-bold text-slate-900 mb-6">
+    {{ isEdit() ? 'Rediger jobb' : 'Legg ut ny jobb' }}
+  </h1>
+
+  @if (loadError()) {
+    <div class="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800 mb-4">
+      {{ loadError() }}
+    </div>
+  }
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+    class="bg-white border border-slate-200 rounded-lg p-6 space-y-4"
+  >
+    @if (submitError()) {
+      <div class="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800">
+        {{ submitError() }}
+      </div>
+    }
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Kategori</label>
+      <select
+        formControlName="categoryId"
+        class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+      >
+        <option value="">Velg kategori ...</option>
+        @for (c of categories(); track c.id) {
+          <option [value]="c.id">{{ c.name }} (fra {{ c.minAge }} år)</option>
+        }
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Tittel</label>
+      <input
+        type="text"
+        formControlName="title"
+        placeholder="F.eks. «Hjelp med å kaste søppel»"
+        class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+      />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Beskrivelse</label>
+      <textarea
+        formControlName="description"
+        rows="5"
+        placeholder="Beskriv jobben — hva som skal gjøres, hva som er viktig å vite."
+        class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+      ></textarea>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Prismodell</label>
+        <select
+          formControlName="priceModel"
+          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+        >
+          <option value="FixedPrice">Fastpris</option>
+          <option value="HourlyRate">Timesats</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Pris (NOK)</label>
+        <input
+          type="number"
+          formControlName="price"
+          min="1"
+          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Tidsestimat (timer)</label>
+        <input
+          type="number"
+          formControlName="estimatedHours"
+          min="0.1"
+          step="0.5"
+          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+        />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Frist</label>
+        <select
+          formControlName="deadlineType"
+          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+        >
+          <option value="WithinDays">Innen X dager</option>
+          <option value="ByDate">Innen dato</option>
+          <option value="OpenEnded">Åpen frist</option>
+        </select>
+      </div>
+      <div>
+        @if (form.controls.deadlineType.value === 'WithinDays') {
+          <label class="block text-sm font-medium text-slate-700 mb-1">Antall dager</label>
+          <input
+            type="number"
+            formControlName="deadlineDays"
+            min="1"
+            max="365"
+            class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        } @else if (form.controls.deadlineType.value === 'ByDate') {
+          <label class="block text-sm font-medium text-slate-700 mb-1">Senest dato</label>
+          <input
+            type="date"
+            formControlName="deadlineDate"
+            class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        }
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Postnummer</label>
+      <input
+        type="text"
+        formControlName="postalCode"
+        maxlength="4"
+        placeholder="5000"
+        class="block w-32 rounded-md border border-slate-300 px-3 py-2 text-sm"
+      />
+    </div>
+
+    <div class="pt-4 border-t border-slate-200 flex items-center justify-between">
+      <p class="text-xs text-slate-500">
+        Du betaler 5% av oppgitt pris i plattformavgift når jobben publiseres.
+      </p>
+      <div class="flex gap-2">
+        <a
+          routerLink="/jobs/mine"
+          class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+        >
+          Avbryt
+        </a>
+        <button
+          type="submit"
+          [disabled]="submitting()"
+          class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+        >
+          {{ submitting() ? 'Lagrer ...' : isEdit() ? 'Lagre endringer' : 'Lagre kladd' }}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

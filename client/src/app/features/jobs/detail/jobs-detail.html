@@ -1,0 +1,108 @@
+@if (loading()) {
+  <p class="text-sm text-slate-500">Laster ...</p>
+} @else if (error() || !job()) {
+  <div class="bg-white border border-slate-200 rounded-lg p-8 text-center">
+    <p class="text-sm text-red-600">{{ error() ?? 'Fant ikke jobben.' }}</p>
+    <a routerLink="/jobs" class="mt-4 inline-block text-sm text-blue-600 hover:text-blue-700">
+      Tilbake til jobblisten
+    </a>
+  </div>
+} @else if (job(); as j) {
+  <div class="bg-white border border-slate-200 rounded-lg p-6">
+    <div class="flex items-start justify-between gap-4 mb-4">
+      <div>
+        <p class="text-xs text-slate-500">{{ j.categoryName }}</p>
+        <h1 class="text-2xl font-bold text-slate-900 mt-1">{{ j.title }}</h1>
+      </div>
+      <span
+        class="shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+        [class]="statusClass(j.status)"
+      >
+        {{ statusLabel(j.status) }}
+      </span>
+    </div>
+
+    <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm border-y border-slate-200 py-4 mb-6">
+      <div>
+        <dt class="text-xs text-slate-500">Pris</dt>
+        <dd class="font-medium text-slate-900">{{ priceLabel(j) }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs text-slate-500">Tidsestimat</dt>
+        <dd class="font-medium text-slate-900">{{ j.estimatedHours }} timer</dd>
+      </div>
+      <div>
+        <dt class="text-xs text-slate-500">Frist</dt>
+        <dd class="font-medium text-slate-900">{{ deadlineLabel(j) }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs text-slate-500">Sted</dt>
+        <dd class="font-medium text-slate-900">
+          {{ j.postalCode }}{{ j.city ? ' · ' + j.city : '' }}
+        </dd>
+      </div>
+    </dl>
+
+    <h2 class="text-sm font-semibold text-slate-900 mb-2">Beskrivelse</h2>
+    <p class="text-sm text-slate-700 whitespace-pre-line">{{ j.description }}</p>
+
+    <div class="mt-6 pt-4 border-t border-slate-200 flex items-center justify-between text-sm">
+      <div>
+        <span class="text-slate-500">Lagt ut av </span>
+        <span class="font-medium text-slate-900">{{ j.lister.fullName }}</span>
+        @if (j.lister.averageRating !== null) {
+          <span class="text-slate-500">
+            · ★ {{ j.lister.averageRating | number: '1.1-1' }}
+          </span>
+        }
+      </div>
+      @if (j.platformFee > 0) {
+        <span class="text-xs text-slate-500">
+          5% plattformavgift: {{ j.platformFee }} kr
+        </span>
+      }
+    </div>
+  </div>
+
+  <div class="mt-4 flex flex-wrap gap-2">
+    @if (isOwner()) {
+      @if (j.status === 'Draft') {
+        <a
+          [routerLink]="['/jobs', j.id, 'edit']"
+          class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+        >
+          Rediger
+        </a>
+        <button
+          type="button"
+          (click)="publish()"
+          [disabled]="busy()"
+          class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+        >
+          Publiser
+        </button>
+        <button
+          type="button"
+          (click)="deleteDraft()"
+          [disabled]="busy()"
+          class="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60"
+        >
+          Slett kladd
+        </button>
+      } @else if (j.status === 'Open' || j.status === 'Assigned') {
+        <button
+          type="button"
+          (click)="cancel()"
+          [disabled]="busy()"
+          class="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60"
+        >
+          Avbryt jobben
+        </button>
+      }
+    } @else if (j.status === 'Open') {
+      <div class="rounded-md bg-slate-100 px-4 py-3 text-sm text-slate-600">
+        Søknadsfunksjon kommer i neste bolk.
+      </div>
+    }
+  </div>
+}
