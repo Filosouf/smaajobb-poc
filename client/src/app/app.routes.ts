@@ -56,6 +56,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'payment/success',
+        loadComponent: () =>
+          import('./features/payment/payment-success').then(
+            (m) => m.PaymentSuccessPage
+          )
+      },
+      {
         path: 'jobs/:id/edit',
         loadComponent: () =>
           import('./features/jobs/form/jobs-form').then((m) => m.JobsFormPage)

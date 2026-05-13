@@ -52,13 +52,48 @@ ng serve
 | SQL Server | localhost:1433 (sa / `Local_dev_passord_2026!`) |
 | smtp4dev web-UI | http://localhost:3001 |
 
-### Stripe-webhooks lokalt
+### Stripe-oppsett (Bolk 4)
 
-Når Stripe-integrasjon er på plass:
+Plattformen krever Stripe i test-modus for å publisere jobber.
+
+**1. Skaff test-nøkler:**
+
+- Lag gratis Stripe-konto på https://dashboard.stripe.com
+- Bytt til **Test mode** (toggle øverst til høyre)
+- Gå til https://dashboard.stripe.com/test/apikeys
+- Kopiér **Secret key** (starter med `sk_test_…`)
+
+**2. Sett nøkkelen som user-secret:**
 
 ```bash
+cd server
+dotnet user-secrets set "Stripe:SecretKey" "sk_test_..."
+```
+
+**3. (Valgfritt) Webhook for sanntids-bekreftelse:**
+
+POC-en faller tilbake til polling fra `/payment/success`-siden, så webhook er
+**ikke strengt nødvendig** for at flyten skal virke. Men for prod-likhet:
+
+```bash
+brew install stripe/stripe-cli/stripe
+stripe login
 stripe listen --forward-to localhost:5000/api/webhooks/stripe
 ```
+
+Kommandoen skriver ut en `whsec_…`-nøkkel. Sett den også:
+
+```bash
+dotnet user-secrets set "Stripe:WebhookSecret" "whsec_..."
+```
+
+**4. Teste med kort:**
+
+I Stripe Checkout, bruk test-kort:
+- `4242 4242 4242 4242` (vellykket)
+- Utløpsdato: hvilken som helst i framtiden
+- CVC: 3 tilfeldige siffer
+- Postnummer: hvilket som helst
 
 ## Prosjektstruktur
 

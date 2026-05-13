@@ -134,7 +134,14 @@ export class JobsDetailPage {
     if (!j) return;
     this.busy.set(true);
     try {
-      this.job.set(await this.jobs.publish(j.id));
+      const res = await this.jobs.publish(j.id);
+      if (res.checkoutUrl) {
+        window.location.href = res.checkoutUrl;
+        return;
+      }
+      this.job.set(res.job);
+    } catch (err: unknown) {
+      this.error.set(extractError(err) ?? 'Kunne ikke starte betalingen.');
     } finally {
       this.busy.set(false);
     }

@@ -71,12 +71,12 @@ public class JobsController : ControllerBase
 
     [Authorize]
     [HttpPost("{id:guid}/publish")]
-    public async Task<ActionResult<JobDetail>> Publish(Guid id, CancellationToken ct)
+    public async Task<ActionResult<PublishResponseDto>> Publish(Guid id, CancellationToken ct)
     {
         try
         {
-            var job = await _jobs.PublishAsync(id, RequireUserId(), ct);
-            return Ok(job);
+            var result = await _jobs.PublishAsync(id, RequireUserId(), ct);
+            return Ok(new PublishResponseDto(result.Job, result.CheckoutUrl));
         }
         catch (KeyNotFoundException) { return NotFound(); }
         catch (UnauthorizedAccessException) { return Forbid(); }

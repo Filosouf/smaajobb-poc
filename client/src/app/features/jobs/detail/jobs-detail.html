@@ -85,11 +85,20 @@
           >Rediger</a>
           <button type="button" (click)="publish()" [disabled]="busy()"
             class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
-            Publiser
+            Publiser ({{ j.platformFee || (j.price * 0.05) }} kr platformavgift)
           </button>
           <button type="button" (click)="deleteDraft()" [disabled]="busy()"
             class="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60">
             Slett kladd
+          </button>
+        } @else if (j.status === 'AwaitingPayment') {
+          <button type="button" (click)="publish()" [disabled]="busy()"
+            class="rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-60">
+            Fullfør betaling
+          </button>
+          <button type="button" (click)="cancel()" [disabled]="busy()"
+            class="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60">
+            Avbryt
           </button>
         } @else if (j.status === 'AwaitingConfirmation') {
           <button type="button" (click)="confirmCompletion()" [disabled]="busy()"

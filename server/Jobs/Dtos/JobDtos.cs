@@ -84,3 +84,5 @@ public record JobFilter(
     decimal? MaxPrice,
     JobStatus? Status,
     bool MineOnly);
+
+public record PublishResponseDto(JobDetail Job, string? CheckoutUrl);

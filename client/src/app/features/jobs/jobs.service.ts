@@ -7,7 +7,8 @@ import {
   JobDetail,
   JobInput,
   JobListItem,
-  JobSearchParams
+  JobSearchParams,
+  PublishResponse
 } from './jobs.types';
 
 @Injectable({ providedIn: 'root' })
@@ -45,9 +46,18 @@ export class JobsService {
     return firstValueFrom(this.http.put<JobDetail>(`${this.base}/jobs/${id}`, input));
   }
 
-  publish(id: string): Promise<JobDetail> {
+  publish(id: string): Promise<PublishResponse> {
     return firstValueFrom(
-      this.http.post<JobDetail>(`${this.base}/jobs/${id}/publish`, null)
+      this.http.post<PublishResponse>(`${this.base}/jobs/${id}/publish`, null)
+    );
+  }
+
+  checkPayment(sessionId: string): Promise<{ paid: boolean }> {
+    return firstValueFrom(
+      this.http.post<{ paid: boolean }>(
+        `${this.base}/payments/${sessionId}/check`,
+        null
+      )
     );
   }
 

@@ -3,8 +3,11 @@ using SmaaJobb.Api.Data;
 using SmaaJobb.Api.Domain;
 using SmaaJobb.Api.Domain.Entities;
 using SmaaJobb.Api.Jobs.Dtos;
+using SmaaJobb.Api.Payments;
 
 namespace SmaaJobb.Api.Jobs;
+
+public record PublishResult(JobDetail Job, string? CheckoutUrl);
 
 public interface IJobService
 {
@@ -12,7 +15,7 @@ public interface IJobService
     Task<JobDetail?> GetAsync(Guid id, CancellationToken ct);
     Task<JobDetail> CreateAsync(Guid listerId, CreateJobRequest req, CancellationToken ct);
     Task<JobDetail> UpdateAsync(Guid id, Guid listerId, UpdateJobRequest req, CancellationToken ct);
-    Task<JobDetail> PublishAsync(Guid id, Guid listerId, CancellationToken ct);
+    Task<PublishResult> PublishAsync(Guid id, Guid listerId, CancellationToken ct);
     Task<JobDetail> CancelAsync(Guid id, Guid listerId, CancellationToken ct);
     Task DeleteDraftAsync(Guid id, Guid listerId, CancellationToken ct);
     Task<JobDetail> MarkCompletedAsync(Guid id, Guid workerId, CancellationToken ct);
@@ -24,8 +27,13 @@ public class JobService : IJobService
     private const decimal PlatformFeeRate = 0.05m;
 
     private readonly AppDbContext _db;
+    private readonly IPaymentService _payments;
 
-    public JobService(AppDbContext db) => _db = db;
+    public JobService(AppDbContext db, IPaymentService payments)
+    {
+        _db = db;
+        _payments = payments;
+    }
 
     public async Task<IReadOnlyList<JobListItem>> SearchAsync(JobFilter filter, Guid? currentUserId, CancellationToken ct)
     {
@@ -135,24 +143,25 @@ public class JobService : IJobService
         return (await GetAsync(id, ct))!;
     }
 
-    public async Task<JobDetail> PublishAsync(Guid id, Guid listerId, CancellationToken ct)
+    public async Task<PublishResult> PublishAsync(Guid id, Guid listerId, CancellationToken ct)
     {
-        var job = await _db.JobListings.FirstOrDefaultAsync(j => j.Id == id, ct)
+        var job = await _db.JobListings
+            .Include(j => j.Lister)
+            .FirstOrDefaultAsync(j => j.Id == id, ct)
             ?? throw new KeyNotFoundException();
 
         if (job.ListerId != listerId)
             throw new UnauthorizedAccessException();
-        if (job.Status != JobStatus.Draft)
-            throw new InvalidOperationException("Kun kladd kan publiseres.");
+        if (job.Status != JobStatus.Draft && job.Status != JobStatus.AwaitingPayment)
+            throw new InvalidOperationException("Kun kladd eller jobber som venter på betaling kan publiseres.");
 
-        // Bolk 3: her starter Stripe Checkout og setter Status = AwaitingPayment
-        // Bolk 2: hopper rett til Open
-        job.PlatformFee = Math.Round(job.Price * PlatformFeeRate, 2);
-        job.Status = JobStatus.Open;
-        job.PublishedAt = DateTime.UtcNow;
+        if (!_payments.IsConfigured)
+            throw new InvalidOperationException(
+                "Stripe er ikke konfigurert. Sett Stripe:SecretKey via dotnet user-secrets eller miljøvariabler.");
 
-        await _db.SaveChangesAsync(ct);
-        return (await GetAsync(id, ct))!;
+        var checkout = await _payments.CreatePublishCheckoutAsync(job, job.Lister!, ct);
+        var detail = (await GetAsync(id, ct))!;
+        return new PublishResult(detail, checkout.CheckoutUrl);
     }
 
     public async Task<JobDetail> CancelAsync(Guid id, Guid listerId, CancellationToken ct)

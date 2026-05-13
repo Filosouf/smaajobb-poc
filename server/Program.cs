@@ -7,6 +7,7 @@ using SmaaJobb.Api.Auth;
 using SmaaJobb.Api.Data;
 using SmaaJobb.Api.Domain.Entities;
 using SmaaJobb.Api.Email;
+using SmaaJobb.Api.Payments;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ const string DevCorsPolicy = "AngularDev";
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("App"));
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
     ?? throw new InvalidOperationException("Missing Jwt configuration section.");
 
@@ -70,6 +72,7 @@ builder.Services.AddScoped<SmaaJobb.Api.Applications.IApplicationService, SmaaJo
 builder.Services.AddScoped<SmaaJobb.Api.Messages.IMessageService, SmaaJobb.Api.Messages.MessageService>();
 builder.Services.AddScoped<SmaaJobb.Api.Ratings.IRatingService, SmaaJobb.Api.Ratings.RatingService>();
 builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 // --- CORS (dev only — prod serverer Angular og API fra samme origin) ---
 builder.Services.AddCors(options =>

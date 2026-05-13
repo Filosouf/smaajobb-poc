@@ -86,3 +86,8 @@ export interface JobSearchParams {
   status?: JobStatus;
   mineOnly?: boolean;
 }
+
+export interface PublishResponse {
+  job: JobDetail;
+  checkoutUrl: string | null;
+}
