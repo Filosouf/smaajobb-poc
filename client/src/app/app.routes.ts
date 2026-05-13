@@ -49,6 +49,13 @@ export const routes: Routes = [
         data: { mineOnly: true }
       },
       {
+        path: 'applications/mine',
+        loadComponent: () =>
+          import('./features/applications/my-applications').then(
+            (m) => m.MyApplicationsPage
+          )
+      },
+      {
         path: 'jobs/:id/edit',
         loadComponent: () =>
           import('./features/jobs/form/jobs-form').then((m) => m.JobsFormPage)

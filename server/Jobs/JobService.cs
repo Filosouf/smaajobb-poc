@@ -15,6 +15,8 @@ public interface IJobService
     Task<JobDetail> PublishAsync(Guid id, Guid listerId, CancellationToken ct);
     Task<JobDetail> CancelAsync(Guid id, Guid listerId, CancellationToken ct);
     Task DeleteDraftAsync(Guid id, Guid listerId, CancellationToken ct);
+    Task<JobDetail> MarkCompletedAsync(Guid id, Guid workerId, CancellationToken ct);
+    Task<JobDetail> ConfirmCompletionAsync(Guid id, Guid listerId, CancellationToken ct);
 }
 
 public class JobService : IJobService
@@ -164,6 +166,45 @@ public class JobService : IJobService
             throw new InvalidOperationException("Jobben er allerede avsluttet.");
 
         job.Status = JobStatus.Cancelled;
+        await _db.SaveChangesAsync(ct);
+        return (await GetAsync(id, ct))!;
+    }
+
+    public async Task<JobDetail> MarkCompletedAsync(Guid id, Guid workerId, CancellationToken ct)
+    {
+        var job = await _db.JobListings.FirstOrDefaultAsync(j => j.Id == id, ct)
+            ?? throw new KeyNotFoundException();
+
+        if (job.AssignedToId != workerId)
+            throw new UnauthorizedAccessException();
+        if (job.Status != JobStatus.Assigned)
+            throw new InvalidOperationException("Bare tildelte jobber kan markeres ferdig.");
+
+        job.Status = JobStatus.AwaitingConfirmation;
+        await _db.SaveChangesAsync(ct);
+        return (await GetAsync(id, ct))!;
+    }
+
+    public async Task<JobDetail> ConfirmCompletionAsync(Guid id, Guid listerId, CancellationToken ct)
+    {
+        var job = await _db.JobListings
+            .Include(j => j.Lister)
+            .Include(j => j.AssignedTo)
+            .FirstOrDefaultAsync(j => j.Id == id, ct)
+            ?? throw new KeyNotFoundException();
+
+        if (job.ListerId != listerId)
+            throw new UnauthorizedAccessException();
+        if (job.Status != JobStatus.AwaitingConfirmation)
+            throw new InvalidOperationException("Jobben venter ikke på bekreftelse.");
+
+        job.Status = JobStatus.Completed;
+        job.CompletedAt = DateTime.UtcNow;
+
+        // Inkrementer CompletedJobs på begge parter
+        if (job.Lister is not null) job.Lister.CompletedJobs += 1;
+        if (job.AssignedTo is not null) job.AssignedTo.CompletedJobs += 1;
+
         await _db.SaveChangesAsync(ct);
         return (await GetAsync(id, ct))!;
     }

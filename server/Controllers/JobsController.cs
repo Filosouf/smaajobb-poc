@@ -84,6 +84,26 @@ public class JobsController : ControllerBase
     }
 
     [Authorize]
+    [HttpPost("{id:guid}/complete")]
+    public async Task<ActionResult<JobDetail>> Complete(Guid id, CancellationToken ct)
+    {
+        try { return Ok(await _jobs.MarkCompletedAsync(id, RequireUserId(), ct)); }
+        catch (KeyNotFoundException) { return NotFound(); }
+        catch (UnauthorizedAccessException) { return Forbid(); }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    [Authorize]
+    [HttpPost("{id:guid}/confirm")]
+    public async Task<ActionResult<JobDetail>> Confirm(Guid id, CancellationToken ct)
+    {
+        try { return Ok(await _jobs.ConfirmCompletionAsync(id, RequireUserId(), ct)); }
+        catch (KeyNotFoundException) { return NotFound(); }
+        catch (UnauthorizedAccessException) { return Forbid(); }
+        catch (InvalidOperationException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
+    [Authorize]
     [HttpPost("{id:guid}/cancel")]
     public async Task<ActionResult<JobDetail>> Cancel(Guid id, CancellationToken ct)
     {

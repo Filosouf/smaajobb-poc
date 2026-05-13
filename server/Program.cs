@@ -66,6 +66,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<SmaaJobb.Api.Jobs.IJobService, SmaaJobb.Api.Jobs.JobService>();
+builder.Services.AddScoped<SmaaJobb.Api.Applications.IApplicationService, SmaaJobb.Api.Applications.ApplicationService>();
+builder.Services.AddScoped<SmaaJobb.Api.Messages.IMessageService, SmaaJobb.Api.Messages.MessageService>();
+builder.Services.AddScoped<SmaaJobb.Api.Ratings.IRatingService, SmaaJobb.Api.Ratings.RatingService>();
 builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
 
 // --- CORS (dev only — prod serverer Angular og API fra samme origin) ---

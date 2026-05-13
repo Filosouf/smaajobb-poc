@@ -57,6 +57,18 @@ export class JobsService {
     );
   }
 
+  complete(id: string): Promise<JobDetail> {
+    return firstValueFrom(
+      this.http.post<JobDetail>(`${this.base}/jobs/${id}/complete`, null)
+    );
+  }
+
+  confirm(id: string): Promise<JobDetail> {
+    return firstValueFrom(
+      this.http.post<JobDetail>(`${this.base}/jobs/${id}/confirm`, null)
+    );
+  }
+
   deleteDraft(id: string): Promise<void> {
     return firstValueFrom(this.http.delete<void>(`${this.base}/jobs/${id}`));
   }

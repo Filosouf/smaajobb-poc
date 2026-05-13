@@ -8,100 +8,313 @@
     </a>
   </div>
 } @else if (job(); as j) {
-  <div class="bg-white border border-slate-200 rounded-lg p-6">
-    <div class="flex items-start justify-between gap-4 mb-4">
-      <div>
-        <p class="text-xs text-slate-500">{{ j.categoryName }}</p>
-        <h1 class="text-2xl font-bold text-slate-900 mt-1">{{ j.title }}</h1>
+  <div class="space-y-6">
+    <!-- Hovedkort -->
+    <div class="bg-white border border-slate-200 rounded-lg p-6">
+      <div class="flex items-start justify-between gap-4 mb-4">
+        <div>
+          <p class="text-xs text-slate-500">{{ j.categoryName }}</p>
+          <h1 class="text-2xl font-bold text-slate-900 mt-1">{{ j.title }}</h1>
+        </div>
+        <span
+          class="shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+          [class]="statusClass(j.status)"
+        >
+          {{ statusLabel(j.status) }}
+        </span>
       </div>
-      <span
-        class="shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-        [class]="statusClass(j.status)"
-      >
-        {{ statusLabel(j.status) }}
-      </span>
-    </div>
 
-    <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm border-y border-slate-200 py-4 mb-6">
-      <div>
-        <dt class="text-xs text-slate-500">Pris</dt>
-        <dd class="font-medium text-slate-900">{{ priceLabel(j) }}</dd>
-      </div>
-      <div>
-        <dt class="text-xs text-slate-500">Tidsestimat</dt>
-        <dd class="font-medium text-slate-900">{{ j.estimatedHours }} timer</dd>
-      </div>
-      <div>
-        <dt class="text-xs text-slate-500">Frist</dt>
-        <dd class="font-medium text-slate-900">{{ deadlineLabel(j) }}</dd>
-      </div>
-      <div>
-        <dt class="text-xs text-slate-500">Sted</dt>
-        <dd class="font-medium text-slate-900">
-          {{ j.postalCode }}{{ j.city ? ' · ' + j.city : '' }}
-        </dd>
-      </div>
-    </dl>
+      <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm border-y border-slate-200 py-4 mb-6">
+        <div>
+          <dt class="text-xs text-slate-500">Pris</dt>
+          <dd class="font-medium text-slate-900">{{ priceLabel(j) }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-slate-500">Tidsestimat</dt>
+          <dd class="font-medium text-slate-900">{{ j.estimatedHours }} timer</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-slate-500">Frist</dt>
+          <dd class="font-medium text-slate-900">{{ deadlineLabel(j) }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-slate-500">Sted</dt>
+          <dd class="font-medium text-slate-900">
+            {{ j.postalCode }}{{ j.city ? ' · ' + j.city : '' }}
+          </dd>
+        </div>
+      </dl>
 
-    <h2 class="text-sm font-semibold text-slate-900 mb-2">Beskrivelse</h2>
-    <p class="text-sm text-slate-700 whitespace-pre-line">{{ j.description }}</p>
+      <h2 class="text-sm font-semibold text-slate-900 mb-2">Beskrivelse</h2>
+      <p class="text-sm text-slate-700 whitespace-pre-line">{{ j.description }}</p>
 
-    <div class="mt-6 pt-4 border-t border-slate-200 flex items-center justify-between text-sm">
-      <div>
-        <span class="text-slate-500">Lagt ut av </span>
-        <span class="font-medium text-slate-900">{{ j.lister.fullName }}</span>
-        @if (j.lister.averageRating !== null) {
-          <span class="text-slate-500">
-            · ★ {{ j.lister.averageRating | number: '1.1-1' }}
-          </span>
+      <div class="mt-6 pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-sm">
+        <div>
+          <span class="text-slate-500">Lagt ut av </span>
+          <span class="font-medium text-slate-900">{{ j.lister.fullName }}</span>
+          @if (j.lister.averageRating !== null) {
+            <span class="text-slate-500">
+              · ★ {{ j.lister.averageRating | number: '1.1-1' }}
+            </span>
+          }
+          @if (j.lister.completedJobs > 0) {
+            <span class="text-slate-500"> · {{ j.lister.completedJobs }} fullført</span>
+          }
+        </div>
+        @if (j.assignedTo) {
+          <div class="text-sm">
+            <span class="text-slate-500">Tildelt </span>
+            <span class="font-medium text-slate-900">{{ j.assignedTo.fullName }}</span>
+            @if (j.assignedTo.averageRating !== null) {
+              <span class="text-slate-500">
+                · ★ {{ j.assignedTo.averageRating | number: '1.1-1' }}
+              </span>
+            }
+          </div>
         }
       </div>
-      @if (j.platformFee > 0) {
-        <span class="text-xs text-slate-500">
-          5% plattformavgift: {{ j.platformFee }} kr
-        </span>
+    </div>
+
+    <!-- Handlinger -->
+    <div class="flex flex-wrap gap-2">
+      @if (isOwner()) {
+        @if (j.status === 'Draft') {
+          <a
+            [routerLink]="['/jobs', j.id, 'edit']"
+            class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >Rediger</a>
+          <button type="button" (click)="publish()" [disabled]="busy()"
+            class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
+            Publiser
+          </button>
+          <button type="button" (click)="deleteDraft()" [disabled]="busy()"
+            class="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60">
+            Slett kladd
+          </button>
+        } @else if (j.status === 'AwaitingConfirmation') {
+          <button type="button" (click)="confirmCompletion()" [disabled]="busy()"
+            class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-60">
+            Bekreft at jobben er ferdig
+          </button>
+        } @else if (j.status === 'Open' || j.status === 'Assigned') {
+          <button type="button" (click)="cancel()" [disabled]="busy()"
+            class="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60">
+            Avbryt jobben
+          </button>
+        }
+      } @else if (isAssignedWorker() && j.status === 'Assigned') {
+        <button type="button" (click)="markCompleted()" [disabled]="busy()"
+          class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
+            Marker som ferdig
+        </button>
+      } @else if (j.status === 'Open' && !isOwner()) {
+        @if (hasApplied()) {
+          <div class="rounded-md bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800">
+            Du har søkt på denne jobben.
+            Status: <strong>{{ applicationStatusLabel(myApplication()!.status) }}</strong>
+          </div>
+        } @else if (!applyOpen()) {
+          <button type="button" (click)="toggleApplyForm()"
+            class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+            Søk på jobben
+          </button>
+        }
       }
     </div>
-  </div>
 
-  <div class="mt-4 flex flex-wrap gap-2">
-    @if (isOwner()) {
-      @if (j.status === 'Draft') {
-        <a
-          [routerLink]="['/jobs', j.id, 'edit']"
-          class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-        >
-          Rediger
-        </a>
-        <button
-          type="button"
-          (click)="publish()"
-          [disabled]="busy()"
-          class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-        >
-          Publiser
-        </button>
-        <button
-          type="button"
-          (click)="deleteDraft()"
-          [disabled]="busy()"
-          class="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60"
-        >
-          Slett kladd
-        </button>
-      } @else if (j.status === 'Open' || j.status === 'Assigned') {
-        <button
-          type="button"
-          (click)="cancel()"
-          [disabled]="busy()"
-          class="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60"
-        >
-          Avbryt jobben
-        </button>
-      }
-    } @else if (j.status === 'Open') {
-      <div class="rounded-md bg-slate-100 px-4 py-3 text-sm text-slate-600">
-        Søknadsfunksjon kommer i neste bolk.
+    <!-- Søknadsskjema for worker -->
+    @if (applyOpen() && j.status === 'Open' && !isOwner()) {
+      <form [formGroup]="applyForm" (ngSubmit)="submitApply()"
+        class="bg-white border border-slate-200 rounded-lg p-4 space-y-3">
+        <label class="block text-sm font-medium text-slate-700">
+          Kort melding til utlyser
+        </label>
+        <textarea formControlName="message" rows="3"
+          placeholder="Fortell hvorfor du passer for jobben."
+          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
+        <div class="flex gap-2">
+          <button type="submit" [disabled]="busy()"
+            class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
+            Send søknad
+          </button>
+          <button type="button" (click)="toggleApplyForm()"
+            class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+            Avbryt
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- Søknadsliste for eier -->
+    @if (isOwner() && applicationsList().length > 0) {
+      <div class="bg-white border border-slate-200 rounded-lg p-6">
+        <h2 class="text-sm font-semibold text-slate-900 mb-4">
+          Søknader ({{ applicationsList().length }})
+        </h2>
+        <ul class="space-y-3">
+          @for (app of applicationsList(); track app.id) {
+            <li class="border border-slate-200 rounded-md p-4">
+              <div class="flex items-start justify-between gap-3 mb-2">
+                <div>
+                  <p class="font-medium text-slate-900">{{ app.workerName }}</p>
+                  <p class="text-xs text-slate-500">
+                    {{ formatTime(app.createdAt) }}
+                    @if (app.workerAverageRating !== null) {
+                      · ★ {{ app.workerAverageRating | number: '1.1-1' }}
+                    }
+                    · {{ app.workerCompletedJobs }} fullført
+                  </p>
+                </div>
+                <span class="text-xs text-slate-500">
+                  {{ applicationStatusLabel(app.status) }}
+                </span>
+              </div>
+              <p class="text-sm text-slate-700 whitespace-pre-line mb-3">{{ app.message }}</p>
+              @if (app.status === 'Pending' && j.status === 'Open') {
+                <div class="flex gap-2">
+                  <button type="button" (click)="acceptApplication(app.id)" [disabled]="busy()"
+                    class="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-60">
+                    Aksepter
+                  </button>
+                  <button type="button" (click)="rejectApplication(app.id)" [disabled]="busy()"
+                    class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-60">
+                    Avvis
+                  </button>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    <!-- Meldinger -->
+    @if (canMessageList()) {
+      <div class="bg-white border border-slate-200 rounded-lg p-6">
+        <h2 class="text-sm font-semibold text-slate-900 mb-4">Meldinger</h2>
+        @if (messagesList().length === 0) {
+          <p class="text-sm text-slate-500 italic mb-4">Ingen meldinger ennå.</p>
+        } @else {
+          <ul class="space-y-2 mb-4 max-h-96 overflow-y-auto">
+            @for (m of messagesList(); track m.id) {
+              <li class="flex" [class.justify-end]="isMine(m.senderId)">
+                <div class="max-w-md rounded-lg px-3 py-2 text-sm"
+                  [class.bg-blue-600]="isMine(m.senderId)"
+                  [class.text-white]="isMine(m.senderId)"
+                  [class.bg-slate-100]="!isMine(m.senderId)"
+                  [class.text-slate-900]="!isMine(m.senderId)">
+                  <p class="whitespace-pre-line">{{ m.body }}</p>
+                  <p class="text-xs mt-1 opacity-75">
+                    {{ isMine(m.senderId) ? 'Deg' : m.senderName }} · {{ formatTime(m.createdAt) }}
+                  </p>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+        @if (j.status === 'Assigned' || j.status === 'AwaitingConfirmation') {
+          <form [formGroup]="messageForm" (ngSubmit)="sendMessage()"
+            class="flex gap-2">
+            <input type="text" formControlName="body"
+              placeholder="Skriv en melding ..."
+              class="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm" />
+            <button type="submit" [disabled]="busy() || messageForm.invalid"
+              class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
+              Send
+            </button>
+          </form>
+        }
+      </div>
+    }
+
+    <!-- Ratings -->
+    @if (j.status === 'Completed' && ratings(); as r) {
+      <div class="bg-white border border-slate-200 rounded-lg p-6">
+        <h2 class="text-sm font-semibold text-slate-900 mb-4">Vurderinger</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          @if (r.listerToWorker; as rating) {
+            <div class="border border-slate-200 rounded-md p-3">
+              <p class="text-xs text-slate-500 mb-1">
+                Fra utlyser til arbeider
+              </p>
+              <p class="text-amber-500 mb-1">
+                @for (i of [1,2,3,4,5]; track i) {
+                  <span>{{ i <= rating.score ? '★' : '☆' }}</span>
+                }
+              </p>
+              @if (rating.comment) {
+                <p class="text-sm text-slate-700 italic">«{{ rating.comment }}»</p>
+              }
+            </div>
+          } @else {
+            <div class="border border-dashed border-slate-200 rounded-md p-3 text-sm text-slate-400">
+              Utlyser har ikke vurdert ennå.
+            </div>
+          }
+          @if (r.workerToLister; as rating) {
+            <div class="border border-slate-200 rounded-md p-3">
+              <p class="text-xs text-slate-500 mb-1">
+                Fra arbeider til utlyser
+              </p>
+              <p class="text-amber-500 mb-1">
+                @for (i of [1,2,3,4,5]; track i) {
+                  <span>{{ i <= rating.score ? '★' : '☆' }}</span>
+                }
+              </p>
+              @if (rating.comment) {
+                <p class="text-sm text-slate-700 italic">«{{ rating.comment }}»</p>
+              }
+            </div>
+          } @else {
+            <div class="border border-dashed border-slate-200 rounded-md p-3 text-sm text-slate-400">
+              Arbeider har ikke vurdert ennå.
+            </div>
+          }
+        </div>
+
+        @if ((r.canRateAsLister || r.canRateAsWorker)) {
+          @if (!rateOpen()) {
+            <button type="button" (click)="toggleRateForm()"
+              class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+              Gi din vurdering
+            </button>
+          } @else {
+            <form [formGroup]="rateForm" (ngSubmit)="submitRating()"
+              class="border-t border-slate-200 pt-4 space-y-3">
+              <div>
+                <p class="text-sm font-medium text-slate-700 mb-2">Stjerner</p>
+                <div class="flex gap-1 text-2xl">
+                  @for (i of [1,2,3,4,5]; track i) {
+                    <button type="button" (click)="setScore(i)"
+                      class="hover:scale-110 transition"
+                      [class.text-amber-500]="i <= rateForm.controls.score.value"
+                      [class.text-slate-300]="i > rateForm.controls.score.value">
+                      ★
+                    </button>
+                  }
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">
+                  Kommentar (valgfritt)
+                </label>
+                <textarea formControlName="comment" rows="2"
+                  class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
+              </div>
+              <div class="flex gap-2">
+                <button type="submit" [disabled]="busy()"
+                  class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
+                  Lagre vurdering
+                </button>
+                <button type="button" (click)="toggleRateForm()"
+                  class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                  Avbryt
+                </button>
+              </div>
+            </form>
+          }
+        }
       </div>
     }
   </div>
