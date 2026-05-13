@@ -1,117 +1,51 @@
-<div class="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-8">
-  <div class="w-full max-w-md">
-    <div class="mb-8 text-center">
-      <h1 class="text-3xl font-bold text-slate-900">SmåJobb</h1>
-      <p class="mt-2 text-sm text-slate-600">Opprett en konto</p>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-hero">
+      <h1 class="auth-title">Bli med på Smaajobb.</h1>
+      <p class="auth-sub">Få ditt første oppdrag — eller publiser ditt eget.</p>
     </div>
 
-    <form
-      [formGroup]="form"
-      (ngSubmit)="submit()"
-      class="bg-white shadow-sm rounded-lg p-6 space-y-4 border border-slate-200"
-    >
+    <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
       @if (errorMessage()) {
-        <div class="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800">
-          {{ errorMessage() }}
-        </div>
+        <div class="auth-error">{{ errorMessage() }}</div>
       }
 
-      <div>
-        <label for="fullName" class="block text-sm font-medium text-slate-700 mb-1">
-          Fullt navn
-        </label>
-        <input
-          id="fullName"
-          type="text"
-          formControlName="fullName"
-          autocomplete="name"
-          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
+      <ui-field label="Fullt navn">
+        <input class="ui-control" type="text" formControlName="fullName" autocomplete="name" />
+      </ui-field>
 
-      <div>
-        <label for="email" class="block text-sm font-medium text-slate-700 mb-1">
-          E-post
-        </label>
-        <input
-          id="email"
-          type="email"
-          formControlName="email"
-          autocomplete="email"
-          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
+      <ui-field label="E-post">
+        <input class="ui-control" type="email" formControlName="email" autocomplete="email" placeholder="navn@example.com" />
+      </ui-field>
 
-      <div>
-        <label for="password" class="block text-sm font-medium text-slate-700 mb-1">
-          Passord <span class="text-slate-500 font-normal">(minst 8 tegn, ett tall, en liten bokstav)</span>
-        </label>
-        <input
-          id="password"
-          type="password"
-          formControlName="password"
-          autocomplete="new-password"
-          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
+      <ui-field label="Passord" hint="Minst 8 tegn, ett tall, en liten bokstav.">
+        <input class="ui-control" type="password" formControlName="password" autocomplete="new-password" />
+      </ui-field>
 
-      <div>
-        <label for="birthDate" class="block text-sm font-medium text-slate-700 mb-1">
-          Fødselsdato
-        </label>
-        <input
-          id="birthDate"
-          type="date"
-          formControlName="birthDate"
-          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
+      <ui-field label="Fødselsdato">
+        <input class="ui-control" type="date" formControlName="birthDate" />
+      </ui-field>
 
-      <div>
-        <label for="phoneNumber" class="block text-sm font-medium text-slate-700 mb-1">
-          Telefon <span class="text-slate-500 font-normal">(valgfritt)</span>
-        </label>
-        <input
-          id="phoneNumber"
-          type="tel"
-          formControlName="phoneNumber"
-          autocomplete="tel"
-          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
+      <ui-field label="Telefon" [optional]="true">
+        <input class="ui-control" type="tel" formControlName="phoneNumber" autocomplete="tel" />
+      </ui-field>
 
-      <div>
-        <label for="postalCode" class="block text-sm font-medium text-slate-700 mb-1">
-          Postnummer <span class="text-slate-500 font-normal">(valgfritt)</span>
-        </label>
-        <input
-          id="postalCode"
-          type="text"
-          formControlName="postalCode"
-          autocomplete="postal-code"
-          maxlength="4"
-          class="block w-32 rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
+      <ui-field label="Postnummer" [optional]="true">
+        <input class="ui-control" type="text" formControlName="postalCode" autocomplete="postal-code" maxlength="4" placeholder="5000" />
+      </ui-field>
 
-      <button
-        type="submit"
-        [disabled]="submitting()"
-        class="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
-      >
+      <button ui-button variant="primary" size="lg" type="submit" [disabled]="submitting()" [full]="true">
         @if (submitting()) {
-          Oppretter konto ...
+          Oppretter konto …
         } @else {
           Opprett konto
         }
       </button>
 
-      <p class="text-center text-sm text-slate-600">
-        Har du allerede konto?
-        <a routerLink="/login" class="font-medium text-blue-600 hover:text-blue-700">
-          Logg inn
-        </a>
-      </p>
+      <div class="auth-links">
+        <span style="color: var(--color-ink-mid)">Har du konto?</span>
+        <a routerLink="/login">Logg inn</a>
+      </div>
     </form>
   </div>
 </div>

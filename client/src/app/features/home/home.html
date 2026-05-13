@@ -1,42 +1,90 @@
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-  <section class="lg:col-span-2 bg-white border border-slate-200 rounded-lg p-6">
-    <h1 class="text-2xl font-bold text-slate-900 mb-2">Velkommen til SmåJobb</h1>
-    <p class="text-sm text-slate-600 mb-4">
-      Marketplace for småjobber. Bla i åpne jobber, eller legg ut din egen.
-    </p>
-    <div class="flex flex-wrap gap-2">
-      <a
-        routerLink="/jobs"
-        class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-      >
-        Se tilgjengelige jobber
-      </a>
-      <a
-        routerLink="/jobs/new"
-        class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-      >
-        Legg ut jobb
-      </a>
-    </div>
-  </section>
-
+<div class="home-page">
+  <!-- Hero -->
   @if (auth.currentUser(); as user) {
-    <aside class="bg-white border border-slate-200 rounded-lg p-6">
-      <h2 class="text-sm font-semibold text-slate-900 mb-3">Din profil</h2>
-      <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-        <dt class="text-slate-500">Navn</dt>
-        <dd class="text-slate-900">{{ user.fullName }}</dd>
-        <dt class="text-slate-500">E-post</dt>
-        <dd class="text-slate-900 truncate">{{ user.email }}</dd>
-        <dt class="text-slate-500">Alder</dt>
-        <dd class="text-slate-900">{{ user.age }} år</dd>
-        <dt class="text-slate-500">Brukertype</dt>
-        <dd class="text-slate-900">
-          {{ user.userType === 'Adult' ? 'Voksen' : 'Mindreårig' }}
-        </dd>
-        <dt class="text-slate-500">Fullførte jobber</dt>
-        <dd class="text-slate-900">{{ user.completedJobs }}</dd>
-      </dl>
-    </aside>
+    <section class="hero">
+      <div class="hero-content">
+        <span class="hero-eyebrow">GOD KVELD</span>
+        <h1 class="hero-title">Hei, {{ user.fullName.split(' ')[0] }}.</h1>
+        <p class="hero-sub">
+          Finn smågjøremål i nærheten — eller legg ut din egen jobb og få hjelp.
+        </p>
+        <div class="hero-actions">
+          <a routerLink="/jobs" class="link-reset">
+            <ui-button variant="primary" size="lg">
+              <ui-icon name="search" [size]="18" />
+              Utforsk jobber
+            </ui-button>
+          </a>
+          <a routerLink="/jobs/new" class="link-reset">
+            <ui-button variant="secondary" size="lg">
+              <ui-icon name="plus" [size]="18" />
+              Legg ut jobb
+            </ui-button>
+          </a>
+        </div>
+      </div>
+      <div class="hero-stars" aria-hidden="true">
+        <span style="top: 14%; left: 65%; --d: 1.5s"></span>
+        <span style="top: 42%; left: 88%; --d: 2.2s"></span>
+        <span style="top: 70%; left: 72%; --d: 1.8s"></span>
+        <span style="top: 22%; left: 92%; --d: 2.6s"></span>
+      </div>
+    </section>
   }
+
+  <!-- Stats / Profil mini-kort -->
+  @if (auth.currentUser(); as user) {
+    <section class="stats-row">
+      <ui-card padding="lg">
+        <div class="stat-card">
+          <ui-avatar [name]="user.fullName" [size]="56" tone="gold" />
+          <div class="stat-text">
+            <div class="stat-name">{{ user.fullName }}</div>
+            @if (user.averageRating !== null) {
+              <ui-rating [value]="user.averageRating" [count]="user.completedJobs" />
+            } @else {
+              <span class="stat-muted">Ingen vurderinger ennå</span>
+            }
+          </div>
+        </div>
+      </ui-card>
+
+      <ui-card padding="lg">
+        <div class="stat-block">
+          <span class="text-label" style="color: var(--color-ink-lo)">FULLFØRTE</span>
+          <span class="stat-big">{{ user.completedJobs }}</span>
+          <span class="stat-muted">Jobber i historikken</span>
+        </div>
+      </ui-card>
+
+      <ui-card padding="lg">
+        <div class="stat-block">
+          <span class="text-label" style="color: var(--color-gold)">BRUKERTYPE</span>
+          <span class="stat-big">
+            {{ user.userType === 'Adult' ? 'Voksen' : 'Mindreårig' }}
+          </span>
+          <span class="stat-muted">{{ user.age }} år gammel</span>
+        </div>
+      </ui-card>
+    </section>
+  }
+
+  <!-- I nærheten / siste jobber -->
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Siste jobber</h2>
+      <a routerLink="/jobs" class="section-link">Se alle</a>
+    </div>
+    @if (recentJobs().length > 0) {
+      <div class="jobs-grid">
+        @for (job of recentJobs(); track job.id) {
+          <job-card [item]="job" />
+        }
+      </div>
+    } @else {
+      <ui-card padding="xl">
+        <p class="empty">Ingen jobber publisert ennå. Bli den første!</p>
+      </ui-card>
+    }
+  </section>
 </div>

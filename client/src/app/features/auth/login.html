@@ -1,72 +1,53 @@
-<div class="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-  <div class="w-full max-w-md">
-    <div class="mb-8 text-center">
-      <h1 class="text-3xl font-bold text-slate-900">SmåJobb</h1>
-      <p class="mt-2 text-sm text-slate-600">Logg inn på kontoen din</p>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-hero">
+      <h1 class="auth-title">God kveld.</h1>
+      <p class="auth-sub">Logg inn for å se nye småjobber i nærheten av deg.</p>
     </div>
 
-    <form
-      [formGroup]="form"
-      (ngSubmit)="submit()"
-      class="bg-white shadow-sm rounded-lg p-6 space-y-4 border border-slate-200"
-    >
+    <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
       @if (errorMessage()) {
-        <div class="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800">
-          {{ errorMessage() }}
-        </div>
+        <div class="auth-error">{{ errorMessage() }}</div>
       }
 
-      <div>
-        <label for="email" class="block text-sm font-medium text-slate-700 mb-1">
-          E-post
-        </label>
+      <ui-field label="E-post" for="login-email">
         <input
-          id="email"
+          id="login-email"
+          class="ui-control"
           type="email"
           formControlName="email"
           autocomplete="email"
-          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          placeholder="navn@example.com"
         />
         @if (form.controls.email.touched && form.controls.email.invalid) {
-          <p class="mt-1 text-xs text-red-600">Skriv inn en gyldig e-postadresse.</p>
+          <p class="field-error">Skriv inn en gyldig e-postadresse.</p>
         }
-      </div>
+      </ui-field>
 
-      <div>
-        <label for="password" class="block text-sm font-medium text-slate-700 mb-1">
-          Passord
-        </label>
+      <ui-field label="Passord" for="login-password">
         <input
-          id="password"
+          id="login-password"
+          class="ui-control"
           type="password"
           formControlName="password"
           autocomplete="current-password"
-          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
         @if (form.controls.password.touched && form.controls.password.invalid) {
-          <p class="mt-1 text-xs text-red-600">Passord må være minst 8 tegn.</p>
+          <p class="field-error">Passord må være minst 8 tegn.</p>
         }
-      </div>
+      </ui-field>
 
-      <button
-        type="submit"
-        [disabled]="submitting()"
-        class="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
-      >
+      <button ui-button variant="primary" size="lg" type="submit" [disabled]="submitting()" [full]="true">
         @if (submitting()) {
-          Logger inn ...
+          Logger inn …
         } @else {
           Logg inn
         }
       </button>
 
-      <div class="flex items-center justify-between text-sm">
-        <a routerLink="/forgot-password" class="text-blue-600 hover:text-blue-700">
-          Glemt passord?
-        </a>
-        <a routerLink="/register" class="font-medium text-blue-600 hover:text-blue-700">
-          Opprett konto
-        </a>
+      <div class="auth-links">
+        <a routerLink="/forgot-password">Glemt passord?</a>
+        <a routerLink="/register">Opprett konto</a>
       </div>
     </form>
   </div>

@@ -1,0 +1,95 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.page-header {
+  text-align: left;
+}
+
+.page-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--color-ink-hi);
+}
+
+.page-sub {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--color-ink-mid);
+}
+
+.link-reset {
+  text-decoration: none;
+  color: inherit;
+}
+
+.muted {
+  color: var(--color-ink-mid);
+  font-size: 14px;
+}
+
+.error {
+  color: var(--color-danger);
+  font-size: 14px;
+}
+
+.empty {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  color: var(--color-ink-mid);
+}
+
+.apps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.job-link {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-ink-hi);
+  text-decoration: none;
+}
+
+.job-link:hover {
+  color: var(--color-gold);
+}
+
+.sent {
+  margin: 4px 0 8px;
+  font-size: 12px;
+  color: var(--color-ink-lo);
+}
+
+.msg {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-ink-mid);
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}

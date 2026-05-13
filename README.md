@@ -114,4 +114,4 @@ Arbeidere fra 13+ år håndteres via foresatt-flyt og jobbkategorier med aldersg
 
 ## Status
 
-I scaffolding-fase. Se [TODO](#) eller spør Claude.
+I scaffolding-fase. Se [TODO]...

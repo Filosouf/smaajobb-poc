@@ -2,11 +2,14 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { UiButton } from '../../shared/ui/ui-button';
+import { UiField } from '../../shared/ui/ui-form-field';
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: './forgot-password.html'
+  imports: [ReactiveFormsModule, RouterLink, UiButton, UiField],
+  templateUrl: './forgot-password.html',
+  styleUrl: './auth.scss'
 })
 export class ForgotPasswordPage {
   private readonly fb = inject(FormBuilder);
@@ -30,7 +33,6 @@ export class ForgotPasswordPage {
       await this.auth.forgotPassword(this.form.getRawValue().email);
       this.sent.set(true);
     } catch {
-      // backend returnerer alltid 204; bare gå til sendt-state
       this.sent.set(true);
     } finally {
       this.submitting.set(false);

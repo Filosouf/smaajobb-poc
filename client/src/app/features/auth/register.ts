@@ -2,11 +2,14 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { UiButton } from '../../shared/ui/ui-button';
+import { UiField } from '../../shared/ui/ui-form-field';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: './register.html'
+  imports: [ReactiveFormsModule, RouterLink, UiButton, UiField],
+  templateUrl: './register.html',
+  styleUrl: './auth.scss'
 })
 export class RegisterPage {
   private readonly fb = inject(FormBuilder);

@@ -1,12 +1,16 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { StatusBadge } from '../../shared/ui/status-badge';
+import { UiButton } from '../../shared/ui/ui-button';
+import { UiCard } from '../../shared/ui/ui-card';
 import { ApplicationsService } from './applications.service';
-import { ApplicationDto, ApplicationStatus } from './applications.types';
+import { ApplicationDto } from './applications.types';
 
 @Component({
   selector: 'app-my-applications',
-  imports: [RouterLink],
-  templateUrl: './my-applications.html'
+  imports: [RouterLink, StatusBadge, UiButton, UiCard],
+  templateUrl: './my-applications.html',
+  styleUrl: './my-applications.scss'
 })
 export class MyApplicationsPage implements OnInit {
   private readonly applications = inject(ApplicationsService);
@@ -37,28 +41,6 @@ export class MyApplicationsPage implements OnInit {
     } finally {
       this.busy.set(false);
     }
-  }
-
-  statusLabel(s: ApplicationStatus): string {
-    const map: Record<ApplicationStatus, string> = {
-      PendingGuardianApproval: 'Venter foresatt',
-      Pending: 'Venter på svar',
-      Accepted: 'Akseptert',
-      Rejected: 'Avvist',
-      Withdrawn: 'Trukket'
-    };
-    return map[s];
-  }
-
-  statusClass(s: ApplicationStatus): string {
-    const map: Record<ApplicationStatus, string> = {
-      PendingGuardianApproval: 'bg-slate-100 text-slate-700',
-      Pending: 'bg-amber-100 text-amber-800',
-      Accepted: 'bg-green-100 text-green-800',
-      Rejected: 'bg-slate-200 text-slate-600',
-      Withdrawn: 'bg-slate-100 text-slate-500'
-    };
-    return map[s];
   }
 
   formatDate(iso: string): string {

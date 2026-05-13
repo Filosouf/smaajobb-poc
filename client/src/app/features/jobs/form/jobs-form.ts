@@ -8,6 +8,10 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { UiButton } from '../../../shared/ui/ui-button';
+import { UiCard } from '../../../shared/ui/ui-card';
+import { UiField } from '../../../shared/ui/ui-form-field';
+import { UiIcon } from '../../../shared/ui/ui-icon';
 import { JobsService } from '../jobs.service';
 import {
   CategoryDto,
@@ -18,8 +22,16 @@ import {
 
 @Component({
   selector: 'app-jobs-form',
-  imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: './jobs-form.html'
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    UiButton,
+    UiCard,
+    UiField,
+    UiIcon
+  ],
+  templateUrl: './jobs-form.html',
+  styleUrl: './jobs-form.scss'
 })
 export class JobsFormPage implements OnInit {
   private readonly jobs = inject(JobsService);

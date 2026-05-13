@@ -1,58 +1,55 @@
-<div class="min-h-screen bg-slate-50">
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-10">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-8">
-        <a routerLink="/" class="text-xl font-bold text-slate-900">SmåJobb</a>
-        <nav class="flex items-center gap-1 text-sm">
-          <a
-            routerLink="/jobs"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="px-3 py-1.5 rounded-md text-slate-600 hover:bg-slate-100"
-          >
-            Jobber
-          </a>
-          <a
-            routerLink="/jobs/mine"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            class="px-3 py-1.5 rounded-md text-slate-600 hover:bg-slate-100"
-          >
-            Mine jobber
-          </a>
-          <a
-            routerLink="/applications/mine"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            class="px-3 py-1.5 rounded-md text-slate-600 hover:bg-slate-100"
-          >
-            Mine søknader
-          </a>
-          <a
-            routerLink="/jobs/new"
-            routerLinkActive="bg-slate-100 text-slate-900"
-            class="px-3 py-1.5 rounded-md text-slate-600 hover:bg-slate-100"
-          >
-            Legg ut jobb
-          </a>
-        </nav>
-      </div>
-      <div class="flex items-center gap-3 text-sm">
-        @if (auth.currentUser(); as user) {
-          <span class="text-slate-600 hidden sm:inline">
-            {{ user.fullName }}
-          </span>
-        }
-        <button
-          type="button"
-          (click)="logout()"
-          class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+<div class="min-h-screen bg-night-base">
+  <header class="header">
+    <div class="header-inner">
+      <a routerLink="/" class="logo-link">
+        <ui-logo [size]="24" />
+      </a>
+
+      <nav class="nav">
+        <a
+          routerLink="/jobs"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
         >
-          Logg ut
-        </button>
+          <ui-icon name="home" [size]="18" />
+          <span>Utforsk</span>
+        </a>
+        <a
+          routerLink="/jobs/mine"
+          routerLinkActive="active"
+          class="nav-link"
+        >
+          <ui-icon name="briefcase" [size]="18" />
+          <span>Mine jobber</span>
+        </a>
+        <a
+          routerLink="/applications/mine"
+          routerLinkActive="active"
+          class="nav-link"
+        >
+          <ui-icon name="message" [size]="18" />
+          <span>Mine søknader</span>
+        </a>
+      </nav>
+
+      <div class="actions">
+        <a routerLink="/jobs/new" class="post-cta">
+          <ui-button variant="primary" size="md">
+            <ui-icon name="plus" [size]="18" />
+            Legg ut jobb
+          </ui-button>
+        </a>
+        @if (auth.currentUser(); as user) {
+          <button type="button" class="profile" (click)="logout()" [title]="user.fullName + ' · klikk for å logge ut'">
+            <ui-avatar [name]="user.fullName" [size]="36" tone="gold" />
+          </button>
+        }
       </div>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-8">
+  <main class="main">
     <router-outlet />
   </main>
 </div>

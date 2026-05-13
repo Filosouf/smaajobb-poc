@@ -1,330 +1,347 @@
 @if (loading()) {
-  <p class="text-sm text-slate-500">Laster ...</p>
+  <p class="muted">Laster …</p>
 } @else if (error() || !job()) {
-  <div class="bg-white border border-slate-200 rounded-lg p-8 text-center">
-    <p class="text-sm text-red-600">{{ error() ?? 'Fant ikke jobben.' }}</p>
-    <a routerLink="/jobs" class="mt-4 inline-block text-sm text-blue-600 hover:text-blue-700">
-      Tilbake til jobblisten
-    </a>
-  </div>
+  <ui-card padding="xl">
+    <p class="error">{{ error() ?? 'Fant ikke jobben.' }}</p>
+    <a routerLink="/jobs" class="back-link">Tilbake til jobblisten</a>
+  </ui-card>
 } @else if (job(); as j) {
-  <div class="space-y-6">
-    <!-- Hovedkort -->
-    <div class="bg-white border border-slate-200 rounded-lg p-6">
-      <div class="flex items-start justify-between gap-4 mb-4">
-        <div>
-          <p class="text-xs text-slate-500">{{ j.categoryName }}</p>
-          <h1 class="text-2xl font-bold text-slate-900 mt-1">{{ j.title }}</h1>
+  <div class="detail">
+    <!-- Hero / image -->
+    <div class="hero" [class.tone-gold]="(j.categoryId % 3) === 0" [class.tone-teal]="(j.categoryId % 3) === 1" [class.tone-plum]="(j.categoryId % 3) === 2">
+      <div class="hero-actions">
+        <a routerLink="/jobs" class="back-btn">
+          <ui-icon name="chev-left" [size]="22" />
+        </a>
+        <div class="hero-status">
+          <status-badge [job]="j.status" />
         </div>
-        <span
-          class="shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-          [class]="statusClass(j.status)"
-        >
-          {{ statusLabel(j.status) }}
-        </span>
+      </div>
+      <div class="hero-foot">
+        <span class="hero-cat">{{ j.categoryName }}</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Title -->
+      <div>
+        <h1 class="title">{{ j.title }}</h1>
+        <div class="meta">
+          <ui-icon name="pin" [size]="14" />
+          <span>{{ j.postalCode }}{{ j.city ? ' · ' + j.city : '' }}</span>
+          <span class="dot">·</span>
+          <ui-icon name="clock" [size]="14" />
+          <span>{{ deadlineLabel(j) }}</span>
+        </div>
       </div>
 
-      <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm border-y border-slate-200 py-4 mb-6">
-        <div>
-          <dt class="text-xs text-slate-500">Pris</dt>
-          <dd class="font-medium text-slate-900">{{ priceLabel(j) }}</dd>
-        </div>
-        <div>
-          <dt class="text-xs text-slate-500">Tidsestimat</dt>
-          <dd class="font-medium text-slate-900">{{ j.estimatedHours }} timer</dd>
-        </div>
-        <div>
-          <dt class="text-xs text-slate-500">Frist</dt>
-          <dd class="font-medium text-slate-900">{{ deadlineLabel(j) }}</dd>
-        </div>
-        <div>
-          <dt class="text-xs text-slate-500">Sted</dt>
-          <dd class="font-medium text-slate-900">
-            {{ j.postalCode }}{{ j.city ? ' · ' + j.city : '' }}
-          </dd>
-        </div>
-      </dl>
-
-      <h2 class="text-sm font-semibold text-slate-900 mb-2">Beskrivelse</h2>
-      <p class="text-sm text-slate-700 whitespace-pre-line">{{ j.description }}</p>
-
-      <div class="mt-6 pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-sm">
-        <div>
-          <span class="text-slate-500">Lagt ut av </span>
-          <span class="font-medium text-slate-900">{{ j.lister.fullName }}</span>
-          @if (j.lister.averageRating !== null) {
-            <span class="text-slate-500">
-              · ★ {{ j.lister.averageRating | number: '1.1-1' }}
+      <!-- Price card -->
+      <ui-card padding="lg">
+        <div class="price-card">
+          <div>
+            <span class="text-label" style="color: var(--color-ink-lo)">BETALING</span>
+            <div class="price-row">
+              <span class="price-amount">{{ priceFormatted(j) }}</span>
+              <span class="price-unit">{{ priceUnit(j) }}</span>
+            </div>
+            <span class="text-body-sm" style="color: var(--color-ink-lo)">
+              Estimert {{ j.estimatedHours }} timer
+              @if (j.platformFee > 0) {
+                · 5 % avgift: {{ j.platformFee }} kr
+              }
             </span>
-          }
-          @if (j.lister.completedJobs > 0) {
-            <span class="text-slate-500"> · {{ j.lister.completedJobs }} fullført</span>
+          </div>
+          @if (j.status === 'Open' || j.status === 'Assigned' || j.status === 'AwaitingConfirmation') {
+            <ui-badge tone="success">
+              <ui-icon name="shield" [size]="12" />
+              <span>SIKRET</span>
+            </ui-badge>
           }
         </div>
-        @if (j.assignedTo) {
-          <div class="text-sm">
-            <span class="text-slate-500">Tildelt </span>
-            <span class="font-medium text-slate-900">{{ j.assignedTo.fullName }}</span>
-            @if (j.assignedTo.averageRating !== null) {
-              <span class="text-slate-500">
-                · ★ {{ j.assignedTo.averageRating | number: '1.1-1' }}
-              </span>
+      </ui-card>
+
+      <!-- Description -->
+      <section>
+        <h3 class="section-title">Om jobben</h3>
+        <p class="description">{{ j.description }}</p>
+      </section>
+
+      <!-- Poster card -->
+      <ui-card padding="lg">
+        <div class="poster">
+          <ui-avatar [name]="j.lister.fullName" [size]="56" tone="plum" [verified]="true" />
+          <div class="poster-info">
+            <div class="poster-name">
+              <span>{{ j.lister.fullName }}</span>
+              <ui-badge tone="teal">ID-VERIFISERT</ui-badge>
+            </div>
+            @if (j.lister.averageRating !== null) {
+              <ui-rating [value]="j.lister.averageRating" [count]="j.lister.completedJobs" />
+            } @else {
+              <span class="muted">Ingen vurderinger ennå</span>
             }
           </div>
-        }
-      </div>
-    </div>
-
-    <!-- Handlinger -->
-    <div class="flex flex-wrap gap-2">
-      @if (isOwner()) {
-        @if (j.status === 'Draft') {
-          <a
-            [routerLink]="['/jobs', j.id, 'edit']"
-            class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-          >Rediger</a>
-          <button type="button" (click)="publish()" [disabled]="busy()"
-            class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
-            Publiser ({{ j.platformFee || (j.price * 0.05) }} kr platformavgift)
-          </button>
-          <button type="button" (click)="deleteDraft()" [disabled]="busy()"
-            class="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60">
-            Slett kladd
-          </button>
-        } @else if (j.status === 'AwaitingPayment') {
-          <button type="button" (click)="publish()" [disabled]="busy()"
-            class="rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-60">
-            Fullfør betaling
-          </button>
-          <button type="button" (click)="cancel()" [disabled]="busy()"
-            class="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60">
-            Avbryt
-          </button>
-        } @else if (j.status === 'AwaitingConfirmation') {
-          <button type="button" (click)="confirmCompletion()" [disabled]="busy()"
-            class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-60">
-            Bekreft at jobben er ferdig
-          </button>
-        } @else if (j.status === 'Open' || j.status === 'Assigned') {
-          <button type="button" (click)="cancel()" [disabled]="busy()"
-            class="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60">
-            Avbryt jobben
-          </button>
-        }
-      } @else if (isAssignedWorker() && j.status === 'Assigned') {
-        <button type="button" (click)="markCompleted()" [disabled]="busy()"
-          class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
-            Marker som ferdig
-        </button>
-      } @else if (j.status === 'Open' && !isOwner()) {
-        @if (hasApplied()) {
-          <div class="rounded-md bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800">
-            Du har søkt på denne jobben.
-            Status: <strong>{{ applicationStatusLabel(myApplication()!.status) }}</strong>
-          </div>
-        } @else if (!applyOpen()) {
-          <button type="button" (click)="toggleApplyForm()"
-            class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-            Søk på jobben
-          </button>
-        }
-      }
-    </div>
-
-    <!-- Søknadsskjema for worker -->
-    @if (applyOpen() && j.status === 'Open' && !isOwner()) {
-      <form [formGroup]="applyForm" (ngSubmit)="submitApply()"
-        class="bg-white border border-slate-200 rounded-lg p-4 space-y-3">
-        <label class="block text-sm font-medium text-slate-700">
-          Kort melding til utlyser
-        </label>
-        <textarea formControlName="message" rows="3"
-          placeholder="Fortell hvorfor du passer for jobben."
-          class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
-        <div class="flex gap-2">
-          <button type="submit" [disabled]="busy()"
-            class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
-            Send søknad
-          </button>
-          <button type="button" (click)="toggleApplyForm()"
-            class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
-            Avbryt
-          </button>
         </div>
-      </form>
-    }
+      </ui-card>
 
-    <!-- Søknadsliste for eier -->
-    @if (isOwner() && applicationsList().length > 0) {
-      <div class="bg-white border border-slate-200 rounded-lg p-6">
-        <h2 class="text-sm font-semibold text-slate-900 mb-4">
-          Søknader ({{ applicationsList().length }})
-        </h2>
-        <ul class="space-y-3">
-          @for (app of applicationsList(); track app.id) {
-            <li class="border border-slate-200 rounded-md p-4">
-              <div class="flex items-start justify-between gap-3 mb-2">
-                <div>
-                  <p class="font-medium text-slate-900">{{ app.workerName }}</p>
-                  <p class="text-xs text-slate-500">
-                    {{ formatTime(app.createdAt) }}
-                    @if (app.workerAverageRating !== null) {
-                      · ★ {{ app.workerAverageRating | number: '1.1-1' }}
-                    }
-                    · {{ app.workerCompletedJobs }} fullført
-                  </p>
-                </div>
-                <span class="text-xs text-slate-500">
-                  {{ applicationStatusLabel(app.status) }}
-                </span>
+      <!-- Tildelt arbeider -->
+      @if (j.assignedTo; as worker) {
+        <ui-card padding="lg">
+          <div class="poster">
+            <ui-avatar [name]="worker.fullName" [size]="56" tone="teal" />
+            <div class="poster-info">
+              <span class="text-label" style="color: var(--color-teal)">TILDELT ARBEIDER</span>
+              <div class="poster-name">
+                <span>{{ worker.fullName }}</span>
               </div>
-              <p class="text-sm text-slate-700 whitespace-pre-line mb-3">{{ app.message }}</p>
-              @if (app.status === 'Pending' && j.status === 'Open') {
-                <div class="flex gap-2">
-                  <button type="button" (click)="acceptApplication(app.id)" [disabled]="busy()"
-                    class="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-60">
-                    Aksepter
-                  </button>
-                  <button type="button" (click)="rejectApplication(app.id)" [disabled]="busy()"
-                    class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-60">
-                    Avvis
-                  </button>
-                </div>
+              @if (worker.averageRating !== null) {
+                <ui-rating [value]="worker.averageRating" [count]="worker.completedJobs" />
               }
-            </li>
-          }
-        </ul>
-      </div>
-    }
+            </div>
+          </div>
+        </ui-card>
+      }
 
-    <!-- Meldinger -->
-    @if (canMessageList()) {
-      <div class="bg-white border border-slate-200 rounded-lg p-6">
-        <h2 class="text-sm font-semibold text-slate-900 mb-4">Meldinger</h2>
-        @if (messagesList().length === 0) {
-          <p class="text-sm text-slate-500 italic mb-4">Ingen meldinger ennå.</p>
-        } @else {
-          <ul class="space-y-2 mb-4 max-h-96 overflow-y-auto">
-            @for (m of messagesList(); track m.id) {
-              <li class="flex" [class.justify-end]="isMine(m.senderId)">
-                <div class="max-w-md rounded-lg px-3 py-2 text-sm"
-                  [class.bg-blue-600]="isMine(m.senderId)"
-                  [class.text-white]="isMine(m.senderId)"
-                  [class.bg-slate-100]="!isMine(m.senderId)"
-                  [class.text-slate-900]="!isMine(m.senderId)">
-                  <p class="whitespace-pre-line">{{ m.body }}</p>
-                  <p class="text-xs mt-1 opacity-75">
-                    {{ isMine(m.senderId) ? 'Deg' : m.senderName }} · {{ formatTime(m.createdAt) }}
-                  </p>
-                </div>
-              </li>
-            }
-          </ul>
-        }
-        @if (j.status === 'Assigned' || j.status === 'AwaitingConfirmation') {
-          <form [formGroup]="messageForm" (ngSubmit)="sendMessage()"
-            class="flex gap-2">
-            <input type="text" formControlName="body"
-              placeholder="Skriv en melding ..."
-              class="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm" />
-            <button type="submit" [disabled]="busy() || messageForm.invalid"
-              class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
-              Send
+      <!-- Action buttons -->
+      <div class="actions-bar">
+        @if (isOwner()) {
+          @if (j.status === 'Draft') {
+            <a [routerLink]="['/jobs', j.id, 'edit']" class="link-reset">
+              <ui-button variant="secondary" size="lg">
+                <ui-icon name="pen" [size]="16" />
+                Rediger
+              </ui-button>
+            </a>
+            <button ui-button variant="primary" size="lg" (click)="publish()" [disabled]="busy()">
+              <ui-icon name="card" [size]="18" />
+              Publiser · {{ j.price * 0.05 }} kr
             </button>
+            <button ui-button variant="danger-ghost" size="lg" (click)="deleteDraft()" [disabled]="busy()">
+              <ui-icon name="trash" [size]="16" />
+              Slett kladd
+            </button>
+          } @else if (j.status === 'AwaitingPayment') {
+            <button ui-button variant="primary" size="lg" (click)="publish()" [disabled]="busy()">
+              <ui-icon name="card" [size]="18" />
+              Fullfør betaling
+            </button>
+            <button ui-button variant="danger-ghost" size="lg" (click)="cancel()" [disabled]="busy()">
+              <ui-icon name="cancel" [size]="16" />
+              Avbryt
+            </button>
+          } @else if (j.status === 'AwaitingConfirmation') {
+            <button ui-button variant="primary" size="lg" (click)="confirmCompletion()" [disabled]="busy()">
+              <ui-icon name="check" [size]="18" />
+              Bekreft at jobben er ferdig
+            </button>
+          } @else if (j.status === 'Open' || j.status === 'Assigned') {
+            <button ui-button variant="danger-ghost" size="lg" (click)="cancel()" [disabled]="busy()">
+              <ui-icon name="cancel" [size]="16" />
+              Avbryt jobben
+            </button>
+          }
+        } @else if (isAssignedWorker() && j.status === 'Assigned') {
+          <button ui-button variant="primary" size="lg" [full]="true" (click)="markCompleted()" [disabled]="busy()">
+            <ui-icon name="check" [size]="18" />
+            Marker som ferdig
+          </button>
+        } @else if (j.status === 'Open' && !isOwner()) {
+          @if (hasApplied()) {
+            <ui-card padding="md" style="flex: 1">
+              <span class="muted">Du har søkt på denne jobben.
+                Status: <strong style="color: var(--color-ink-hi)">{{ myApplication()?.status }}</strong>
+              </span>
+            </ui-card>
+          } @else if (!applyOpen()) {
+            <button ui-button variant="primary" size="lg" [full]="true" (click)="toggleApplyForm()">
+              <ui-icon name="sparkle" [size]="18" />
+              Søk på jobben
+            </button>
+          }
+        }
+      </div>
+
+      <!-- Apply form -->
+      @if (applyOpen() && j.status === 'Open' && !isOwner()) {
+        <ui-card padding="lg">
+          <form [formGroup]="applyForm" (ngSubmit)="submitApply()" class="apply-form">
+            <ui-field label="Kort melding til utlyser" hint="Fortell hvorfor du passer for jobben.">
+              <textarea class="ui-control" formControlName="message" rows="3"></textarea>
+            </ui-field>
+            <div class="row-actions">
+              <button ui-button variant="primary" size="md" type="submit" [disabled]="busy()">
+                Send søknad
+              </button>
+              <button ui-button variant="ghost" size="md" type="button" (click)="toggleApplyForm()">
+                Avbryt
+              </button>
+            </div>
           </form>
-        }
-      </div>
-    }
+        </ui-card>
+      }
 
-    <!-- Ratings -->
-    @if (j.status === 'Completed' && ratings(); as r) {
-      <div class="bg-white border border-slate-200 rounded-lg p-6">
-        <h2 class="text-sm font-semibold text-slate-900 mb-4">Vurderinger</h2>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          @if (r.listerToWorker; as rating) {
-            <div class="border border-slate-200 rounded-md p-3">
-              <p class="text-xs text-slate-500 mb-1">
-                Fra utlyser til arbeider
-              </p>
-              <p class="text-amber-500 mb-1">
-                @for (i of [1,2,3,4,5]; track i) {
-                  <span>{{ i <= rating.score ? '★' : '☆' }}</span>
-                }
-              </p>
-              @if (rating.comment) {
-                <p class="text-sm text-slate-700 italic">«{{ rating.comment }}»</p>
-              }
-            </div>
-          } @else {
-            <div class="border border-dashed border-slate-200 rounded-md p-3 text-sm text-slate-400">
-              Utlyser har ikke vurdert ennå.
-            </div>
-          }
-          @if (r.workerToLister; as rating) {
-            <div class="border border-slate-200 rounded-md p-3">
-              <p class="text-xs text-slate-500 mb-1">
-                Fra arbeider til utlyser
-              </p>
-              <p class="text-amber-500 mb-1">
-                @for (i of [1,2,3,4,5]; track i) {
-                  <span>{{ i <= rating.score ? '★' : '☆' }}</span>
-                }
-              </p>
-              @if (rating.comment) {
-                <p class="text-sm text-slate-700 italic">«{{ rating.comment }}»</p>
-              }
-            </div>
-          } @else {
-            <div class="border border-dashed border-slate-200 rounded-md p-3 text-sm text-slate-400">
-              Arbeider har ikke vurdert ennå.
-            </div>
-          }
-        </div>
-
-        @if ((r.canRateAsLister || r.canRateAsWorker)) {
-          @if (!rateOpen()) {
-            <button type="button" (click)="toggleRateForm()"
-              class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-              Gi din vurdering
-            </button>
-          } @else {
-            <form [formGroup]="rateForm" (ngSubmit)="submitRating()"
-              class="border-t border-slate-200 pt-4 space-y-3">
-              <div>
-                <p class="text-sm font-medium text-slate-700 mb-2">Stjerner</p>
-                <div class="flex gap-1 text-2xl">
-                  @for (i of [1,2,3,4,5]; track i) {
-                    <button type="button" (click)="setScore(i)"
-                      class="hover:scale-110 transition"
-                      [class.text-amber-500]="i <= rateForm.controls.score.value"
-                      [class.text-slate-300]="i > rateForm.controls.score.value">
-                      ★
+      <!-- Applications (owner) -->
+      @if (isOwner() && applicationsList().length > 0) {
+        <section>
+          <h3 class="section-title">Søknader · {{ applicationsList().length }}</h3>
+          <div class="apps-list">
+            @for (app of applicationsList(); track app.id) {
+              <ui-card padding="lg">
+                <div class="app-header">
+                  <div class="app-meta">
+                    <ui-avatar [name]="app.workerName" [size]="44" tone="gold" />
+                    <div>
+                      <div class="app-name">{{ app.workerName }}</div>
+                      <div class="app-info">
+                        {{ formatTime(app.createdAt) }}
+                        @if (app.workerAverageRating !== null) {
+                          · ★ {{ app.workerAverageRating | number: '1.1-1' }}
+                        }
+                        · {{ app.workerCompletedJobs }} fullført
+                      </div>
+                    </div>
+                  </div>
+                  <status-badge [application]="app.status" />
+                </div>
+                <p class="app-message">{{ app.message }}</p>
+                @if (app.status === 'Pending' && j.status === 'Open') {
+                  <div class="row-actions">
+                    <button ui-button variant="primary" size="sm" (click)="acceptApplication(app.id)" [disabled]="busy()">
+                      Aksepter
                     </button>
+                    <button ui-button variant="ghost" size="sm" (click)="rejectApplication(app.id)" [disabled]="busy()">
+                      Avvis
+                    </button>
+                  </div>
+                }
+              </ui-card>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Messages -->
+      @if (canMessageList()) {
+        <section>
+          <h3 class="section-title">Meldinger</h3>
+          <ui-card padding="lg">
+            @if (messagesList().length === 0) {
+              <p class="muted" style="margin: 0 0 12px">Ingen meldinger ennå.</p>
+            } @else {
+              <ul class="messages">
+                @for (m of messagesList(); track m.id) {
+                  <li class="message" [class.mine]="isMine(m.senderId)">
+                    <div class="bubble">
+                      <p>{{ m.body }}</p>
+                      <span class="bubble-meta">
+                        {{ isMine(m.senderId) ? 'Deg' : m.senderName }} · {{ formatTime(m.createdAt) }}
+                      </span>
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+            @if (j.status === 'Assigned' || j.status === 'AwaitingConfirmation') {
+              <form [formGroup]="messageForm" (ngSubmit)="sendMessage()" class="message-form">
+                <input
+                  class="ui-control"
+                  type="text"
+                  formControlName="body"
+                  placeholder="Skriv en melding …"
+                />
+                <button ui-button variant="primary" size="md" type="submit" [disabled]="busy() || messageForm.invalid">
+                  Send
+                </button>
+              </form>
+            }
+          </ui-card>
+        </section>
+      }
+
+      <!-- Ratings -->
+      @if (j.status === 'Completed' && ratings(); as r) {
+        <section>
+          <h3 class="section-title">Vurderinger</h3>
+          <div class="ratings-grid">
+            @if (r.listerToWorker; as rating) {
+              <ui-card padding="lg">
+                <div class="rating-card">
+                  <span class="text-label" style="color: var(--color-ink-lo)">Fra utlyser til arbeider</span>
+                  <div class="rating-stars">
+                    @for (i of stars; track i) {
+                      <ui-icon [name]="i <= rating.score ? 'star' : 'star-outline'" [size]="16" />
+                    }
+                  </div>
+                  @if (rating.comment) {
+                    <p class="rating-comment">«{{ rating.comment }}»</p>
                   }
                 </div>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">
-                  Kommentar (valgfritt)
-                </label>
-                <textarea formControlName="comment" rows="2"
-                  class="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
-              </div>
-              <div class="flex gap-2">
-                <button type="submit" [disabled]="busy()"
-                  class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
-                  Lagre vurdering
+              </ui-card>
+            } @else {
+              <ui-card padding="lg" variant="flat">
+                <span class="muted">Utlyser har ikke vurdert ennå.</span>
+              </ui-card>
+            }
+            @if (r.workerToLister; as rating) {
+              <ui-card padding="lg">
+                <div class="rating-card">
+                  <span class="text-label" style="color: var(--color-ink-lo)">Fra arbeider til utlyser</span>
+                  <div class="rating-stars">
+                    @for (i of stars; track i) {
+                      <ui-icon [name]="i <= rating.score ? 'star' : 'star-outline'" [size]="16" />
+                    }
+                  </div>
+                  @if (rating.comment) {
+                    <p class="rating-comment">«{{ rating.comment }}»</p>
+                  }
+                </div>
+              </ui-card>
+            } @else {
+              <ui-card padding="lg" variant="flat">
+                <span class="muted">Arbeider har ikke vurdert ennå.</span>
+              </ui-card>
+            }
+          </div>
+
+          @if (r.canRateAsLister || r.canRateAsWorker) {
+            @if (!rateOpen()) {
+              <div style="margin-top: 16px">
+                <button ui-button variant="primary" size="md" (click)="toggleRateForm()">
+                  <ui-icon name="star" [size]="16" />
+                  Gi din vurdering
                 </button>
-                <button type="button" (click)="toggleRateForm()"
-                  class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
-                  Avbryt
-                </button>
               </div>
-            </form>
+            } @else {
+              <ui-card padding="lg" style="margin-top: 16px">
+                <form [formGroup]="rateForm" (ngSubmit)="submitRating()" class="rate-form">
+                  <div>
+                    <span class="text-label" style="color: var(--color-ink-mid); display: block; margin-bottom: 6px">VELG STJERNER</span>
+                    <div class="rate-stars">
+                      @for (i of stars; track i) {
+                        <button type="button" (click)="setScore(i)" class="rate-star"
+                          [class.active]="i <= rateForm.controls.score.value">
+                          <ui-icon [name]="i <= rateForm.controls.score.value ? 'star' : 'star-outline'" [size]="28" />
+                        </button>
+                      }
+                    </div>
+                  </div>
+                  <ui-field label="Kommentar" [optional]="true">
+                    <textarea class="ui-control" formControlName="comment" rows="3"></textarea>
+                  </ui-field>
+                  <div class="row-actions">
+                    <button ui-button variant="primary" size="md" type="submit" [disabled]="busy()">
+                      Lagre vurdering
+                    </button>
+                    <button ui-button variant="ghost" size="md" type="button" (click)="toggleRateForm()">
+                      Avbryt
+                    </button>
+                  </div>
+                </form>
+              </ui-card>
+            }
           }
-        }
-      </div>
-    }
+        </section>
+      }
+    </div>
   </div>
 }

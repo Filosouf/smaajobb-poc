@@ -1,0 +1,94 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.link-reset {
+  text-decoration: none;
+  color: inherit;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--color-ink-hi);
+}
+
+.page-sub {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--color-ink-mid);
+}
+
+.chip-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.chip-row::-webkit-scrollbar {
+  height: 4px;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(100px, 1fr) minmax(100px, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.muted {
+  color: var(--color-ink-mid);
+  font-size: 14px;
+}
+
+.error {
+  color: var(--color-danger);
+  font-size: 14px;
+}
+
+.empty {
+  margin: 0;
+  text-align: center;
+  color: var(--color-ink-mid);
+  font-size: 14px;
+}
+
+.jobs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 720px) {
+  .filter-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .filter-actions {
+    grid-column: 1 / -1;
+  }
+  .page-title {
+    font-size: 28px;
+  }
+}

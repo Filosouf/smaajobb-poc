@@ -2,11 +2,14 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { UiButton } from '../../shared/ui/ui-button';
+import { UiField } from '../../shared/ui/ui-form-field';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: './reset-password.html'
+  imports: [ReactiveFormsModule, RouterLink, UiButton, UiField],
+  templateUrl: './reset-password.html',
+  styleUrl: './auth.scss'
 })
 export class ResetPasswordPage implements OnInit {
   private readonly fb = inject(FormBuilder);
@@ -52,9 +55,7 @@ export class ResetPasswordPage implements OnInit {
 
     try {
       await this.auth.resetPassword(this.email, this.token, newPassword);
-      this.router.navigate(['/login'], {
-        queryParams: { reset: '1' }
-      });
+      this.router.navigate(['/login'], { queryParams: { reset: '1' } });
     } catch (err: unknown) {
       this.errorMessage.set(
         extractError(err) ?? 'Kunne ikke tilbakestille passordet. Be om ny lenke.'

@@ -1,49 +1,42 @@
-<div class="max-w-md mx-auto py-12">
-  <div class="bg-white border border-slate-200 rounded-lg p-8 text-center">
-    @switch (state()) {
-      @case ('checking') {
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-300 border-t-blue-600 mb-4"></div>
-        <h1 class="text-xl font-semibold text-slate-900 mb-2">Bekrefter betaling ...</h1>
-        <p class="text-sm text-slate-600">
-          Forsøk {{ attempts() }} av 5
-        </p>
-      }
+<div class="page">
+  <ui-card padding="xl">
+    <div class="content">
+      @switch (state()) {
+        @case ('checking') {
+          <div class="spinner"></div>
+          <h1 class="title">Bekrefter betaling …</h1>
+          <p class="sub">Forsøk {{ attempts() }} av 5</p>
+        }
 
-      @case ('paid') {
-        <div class="text-5xl mb-3">✓</div>
-        <h1 class="text-xl font-semibold text-slate-900 mb-2">Betaling bekreftet</h1>
-        <p class="text-sm text-slate-600 mb-6">
-          Jobben er nå publisert og synlig for arbeidere.
-        </p>
-        <a routerLink="/jobs/mine"
-          class="inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-          Gå til mine jobber
-        </a>
-      }
+        @case ('paid') {
+          <div class="icon ok"><ui-icon name="check" [size]="40" /></div>
+          <h1 class="title">Betaling bekreftet.</h1>
+          <p class="sub">Jobben er nå publisert og synlig for arbeidere.</p>
+          <a routerLink="/jobs/mine" class="link-reset">
+            <ui-button variant="primary" size="lg">Gå til mine jobber</ui-button>
+          </a>
+        }
 
-      @case ('unpaid') {
-        <div class="text-5xl mb-3 text-amber-500">⏳</div>
-        <h1 class="text-xl font-semibold text-slate-900 mb-2">Betaling ikke bekreftet</h1>
-        <p class="text-sm text-slate-600 mb-4">
-          Betalingen er sannsynligvis fortsatt under behandling. Sjekk «Mine jobber» om et øyeblikk.
-        </p>
-        <a routerLink="/jobs/mine"
-          class="inline-block rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
-          Til mine jobber
-        </a>
-      }
+        @case ('unpaid') {
+          <div class="icon wait"><ui-icon name="clock" [size]="36" /></div>
+          <h1 class="title">Betaling ikke bekreftet.</h1>
+          <p class="sub">
+            Betalingen er sannsynligvis under behandling. Sjekk «Mine jobber» om et øyeblikk.
+          </p>
+          <a routerLink="/jobs/mine" class="link-reset">
+            <ui-button variant="secondary" size="lg">Til mine jobber</ui-button>
+          </a>
+        }
 
-      @case ('missing') {
-        <div class="text-5xl mb-3 text-red-500">!</div>
-        <h1 class="text-xl font-semibold text-slate-900 mb-2">Ingen session-id</h1>
-        <p class="text-sm text-slate-600 mb-4">
-          Lenken mangler nødvendig informasjon. Gå tilbake til jobbene dine.
-        </p>
-        <a routerLink="/jobs/mine"
-          class="inline-block rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
-          Til mine jobber
-        </a>
+        @case ('missing') {
+          <div class="icon err"><ui-icon name="cancel" [size]="36" /></div>
+          <h1 class="title">Ingen session-id.</h1>
+          <p class="sub">Lenken mangler nødvendig informasjon.</p>
+          <a routerLink="/jobs/mine" class="link-reset">
+            <ui-button variant="secondary" size="lg">Til mine jobber</ui-button>
+          </a>
+        }
       }
-    }
-  </div>
+    </div>
+  </ui-card>
 </div>

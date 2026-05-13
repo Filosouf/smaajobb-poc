@@ -1,114 +1,73 @@
-<div>
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-slate-900">{{ title() }}</h1>
-    <a
-      routerLink="/jobs/new"
-      class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-    >
-      Legg ut jobb
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ title() }}</h1>
+      <p class="page-sub">
+        @if (items().length > 0) {
+          {{ items().length }} jobber matcher
+        } @else {
+          Bla i tilgjengelige oppdrag
+        }
+      </p>
+    </div>
+    <a routerLink="/jobs/new" class="link-reset">
+      <ui-button variant="primary" size="md">
+        <ui-icon name="plus" [size]="18" />
+        Legg ut jobb
+      </ui-button>
     </a>
   </div>
 
-  <form
-    [formGroup]="filterForm"
-    (ngSubmit)="refresh()"
-    class="bg-white border border-slate-200 rounded-lg p-4 mb-6 grid grid-cols-1 sm:grid-cols-5 gap-3"
-  >
-    <div class="sm:col-span-2">
-      <label class="block text-xs font-medium text-slate-700 mb-1">Kategori</label>
-      <select
-        formControlName="categoryId"
-        class="block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+  <!-- Category chips -->
+  <div class="chip-row">
+    <ui-chip [selected]="selectedCategoryId() === null" (click)="selectCategory(null)">
+      Alle
+    </ui-chip>
+    @for (c of categories(); track c.id) {
+      <ui-chip
+        [selected]="selectedCategoryId() === c.id"
+        (click)="selectCategory(c.id)"
       >
-        <option value="">Alle</option>
-        @for (c of categories(); track c.id) {
-          <option [value]="c.id">{{ c.name }}</option>
-        }
-      </select>
-    </div>
-    <div>
-      <label class="block text-xs font-medium text-slate-700 mb-1">Postnummer</label>
-      <input
-        type="text"
-        formControlName="postalCode"
-        maxlength="4"
-        placeholder="5000"
-        class="block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-      />
-    </div>
-    <div>
-      <label class="block text-xs font-medium text-slate-700 mb-1">Pris fra</label>
-      <input
-        type="number"
-        formControlName="minPrice"
-        min="0"
-        class="block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-      />
-    </div>
-    <div>
-      <label class="block text-xs font-medium text-slate-700 mb-1">Pris til</label>
-      <input
-        type="number"
-        formControlName="maxPrice"
-        min="0"
-        class="block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-      />
-    </div>
-    <div class="sm:col-span-5 flex gap-2">
-      <button
-        type="submit"
-        class="rounded-md bg-slate-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-slate-800"
-      >
-        Filtrer
-      </button>
-      <button
-        type="button"
-        (click)="resetFilter()"
-        class="rounded-md border border-slate-300 px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
-      >
-        Tilbakestill
-      </button>
-    </div>
-  </form>
+        {{ c.name }}
+      </ui-chip>
+    }
+  </div>
 
+  <!-- Advanced filter -->
+  <ui-card padding="md">
+    <form [formGroup]="filterForm" (ngSubmit)="refresh()" class="filter-grid">
+      <ui-field label="Postnummer">
+        <input class="ui-control" type="text" formControlName="postalCode" maxlength="4" placeholder="5000" />
+      </ui-field>
+      <ui-field label="Pris fra">
+        <input class="ui-control" type="number" formControlName="minPrice" min="0" />
+      </ui-field>
+      <ui-field label="Pris til">
+        <input class="ui-control" type="number" formControlName="maxPrice" min="0" />
+      </ui-field>
+      <div class="filter-actions">
+        <button ui-button variant="primary" size="md" type="submit">Filtrer</button>
+        <button ui-button variant="ghost" size="md" type="button" (click)="resetFilter()">
+          Tilbakestill
+        </button>
+      </div>
+    </form>
+  </ui-card>
+
+  <!-- Results -->
   @if (loading()) {
-    <p class="text-sm text-slate-500">Laster ...</p>
+    <p class="muted">Laster …</p>
   } @else if (error()) {
-    <p class="text-sm text-red-600">{{ error() }}</p>
+    <p class="error">{{ error() }}</p>
   } @else if (items().length === 0) {
-    <div class="bg-white border border-slate-200 rounded-lg p-8 text-center text-sm text-slate-600">
-      Ingen jobber matcher filtrene.
-    </div>
+    <ui-card padding="xl">
+      <p class="empty">Ingen jobber matcher filtrene.</p>
+    </ui-card>
   } @else {
-    <ul class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="jobs-grid">
       @for (item of items(); track item.id) {
-        <li>
-          <a
-            [routerLink]="['/jobs', item.id]"
-            class="block bg-white border border-slate-200 rounded-lg p-4 hover:border-blue-400 hover:shadow-sm transition"
-          >
-            <div class="flex items-start justify-between gap-3">
-              <h2 class="font-semibold text-slate-900 line-clamp-2">{{ item.title }}</h2>
-              <span
-                class="shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-                [class]="statusClass(item.status)"
-              >
-                {{ statusLabel(item.status) }}
-              </span>
-            </div>
-            <p class="mt-1 text-xs text-slate-500">{{ item.categoryName }}</p>
-            <div class="mt-3 flex items-center justify-between text-sm">
-              <span class="font-medium text-slate-900">{{ priceLabel(item) }}</span>
-              <span class="text-slate-600">
-                {{ item.postalCode }}{{ item.city ? ' · ' + item.city : '' }}
-              </span>
-            </div>
-            <p class="mt-2 text-xs text-slate-500">
-              Estimat: {{ item.estimatedHours }} t
-            </p>
-          </a>
-        </li>
+        <job-card [item]="item" />
       }
-    </ul>
+    </div>
   }
 </div>

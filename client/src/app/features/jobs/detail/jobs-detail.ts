@@ -10,6 +10,14 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { StatusBadge } from '../../../shared/ui/status-badge';
+import { UiAvatar } from '../../../shared/ui/ui-avatar';
+import { UiBadge } from '../../../shared/ui/ui-badge';
+import { UiButton } from '../../../shared/ui/ui-button';
+import { UiCard } from '../../../shared/ui/ui-card';
+import { UiField } from '../../../shared/ui/ui-form-field';
+import { UiIcon } from '../../../shared/ui/ui-icon';
+import { UiRating } from '../../../shared/ui/ui-rating';
 import { ApplicationsService } from '../../applications/applications.service';
 import { ApplicationDto } from '../../applications/applications.types';
 import { MessagesService } from '../../messages/messages.service';
@@ -17,12 +25,25 @@ import { MessageDto } from '../../messages/messages.types';
 import { RatingsService } from '../../ratings/ratings.service';
 import { JobRatingsDto } from '../../ratings/ratings.types';
 import { JobsService } from '../jobs.service';
-import { JobDetail, JobStatus } from '../jobs.types';
+import { JobDetail } from '../jobs.types';
 
 @Component({
   selector: 'app-jobs-detail',
-  imports: [RouterLink, DecimalPipe, ReactiveFormsModule],
-  templateUrl: './jobs-detail.html'
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    DecimalPipe,
+    StatusBadge,
+    UiAvatar,
+    UiBadge,
+    UiButton,
+    UiCard,
+    UiField,
+    UiIcon,
+    UiRating
+  ],
+  templateUrl: './jobs-detail.html',
+  styleUrl: './jobs-detail.scss'
 })
 export class JobsDetailPage {
   private readonly jobs = inject(JobsService);
@@ -82,6 +103,8 @@ export class JobsDetailPage {
     const j = this.job();
     return !!j && this.isParticipant() && j.status !== 'Draft' && j.status !== 'Open';
   });
+
+  readonly stars = [1, 2, 3, 4, 5];
 
   constructor() {
     effect(() => {
@@ -188,7 +211,7 @@ export class JobsDetailPage {
     this.busy.set(true);
     try {
       await this.applications.accept(appId);
-      await Promise.all([this.load(j.id)]);
+      await this.load(j.id);
     } finally {
       this.busy.set(false);
     }
@@ -291,13 +314,14 @@ export class JobsDetailPage {
 
   // --- formatering ---
 
-  priceLabel(j: JobDetail): string {
-    const f = new Intl.NumberFormat('nb-NO', {
-      style: 'currency',
-      currency: 'NOK',
+  priceFormatted(j: JobDetail): string {
+    return new Intl.NumberFormat('nb-NO', {
       maximumFractionDigits: 0
     }).format(j.price);
-    return j.priceModel === 'HourlyRate' ? `${f} / time` : f;
+  }
+
+  priceUnit(j: JobDetail): string {
+    return j.priceModel === 'HourlyRate' ? 'kr/time' : 'kr fast';
   }
 
   deadlineLabel(j: JobDetail): string {
@@ -309,45 +333,6 @@ export class JobsDetailPage {
       );
     }
     return '—';
-  }
-
-  statusLabel(s: JobStatus): string {
-    const map: Record<JobStatus, string> = {
-      Draft: 'Kladd',
-      AwaitingPayment: 'Venter på betaling',
-      Open: 'Åpen',
-      Assigned: 'Tildelt',
-      AwaitingConfirmation: 'Venter bekreftelse',
-      Completed: 'Fullført',
-      Cancelled: 'Avbrutt',
-      Disputed: 'I tvist'
-    };
-    return map[s];
-  }
-
-  statusClass(s: JobStatus): string {
-    const map: Record<JobStatus, string> = {
-      Draft: 'bg-slate-100 text-slate-700',
-      AwaitingPayment: 'bg-amber-100 text-amber-800',
-      Open: 'bg-green-100 text-green-800',
-      Assigned: 'bg-blue-100 text-blue-800',
-      AwaitingConfirmation: 'bg-amber-100 text-amber-800',
-      Completed: 'bg-slate-200 text-slate-700',
-      Cancelled: 'bg-slate-100 text-slate-500',
-      Disputed: 'bg-red-100 text-red-800'
-    };
-    return map[s];
-  }
-
-  applicationStatusLabel(s: ApplicationDto['status']): string {
-    const map: Record<ApplicationDto['status'], string> = {
-      PendingGuardianApproval: 'Venter foresatt',
-      Pending: 'Venter på svar',
-      Accepted: 'Akseptert',
-      Rejected: 'Avvist',
-      Withdrawn: 'Trukket'
-    };
-    return map[s];
   }
 
   formatTime(iso: string): string {
