@@ -103,6 +103,9 @@ export class JobsDetailPage {
     const j = this.job();
     return !!j && this.isParticipant() && j.status !== 'Draft' && j.status !== 'Open';
   });
+  readonly hasPendingApplications = computed(() =>
+    this.applicationsList().some((a) => a.status === 'Pending')
+  );
 
   readonly stars = [1, 2, 3, 4, 5];
 
@@ -344,6 +347,14 @@ export class JobsDetailPage {
 
   isMine(senderId: string): boolean {
     return senderId === this.currentUserId();
+  }
+
+  scrollToMessages(ev: Event): void {
+    ev.preventDefault();
+    document.getElementById('messages')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
   }
 }
 

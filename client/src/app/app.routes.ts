@@ -22,6 +22,13 @@ export const routes: Routes = [
       import('./features/auth/reset-password').then((m) => m.ResetPasswordPage)
   },
   {
+    path: 'payment/success',
+    loadComponent: () =>
+      import('./features/payment/payment-success').then(
+        (m) => m.PaymentSuccessPage
+      )
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -53,13 +60,6 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/applications/my-applications').then(
             (m) => m.MyApplicationsPage
-          )
-      },
-      {
-        path: 'payment/success',
-        loadComponent: () =>
-          import('./features/payment/payment-success').then(
-            (m) => m.PaymentSuccessPage
           )
       },
       {

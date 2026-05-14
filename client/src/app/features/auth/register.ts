@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
@@ -17,20 +17,42 @@ export class RegisterPage {
   private readonly router = inject(Router);
 
   readonly submitting = signal(false);
+  readonly submitted = signal(false);
   readonly errorMessage = signal<string | null>(null);
+
+  readonly maxBirthDate = computed(() => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 13);
+    return d.toISOString().slice(0, 10);
+  });
 
   readonly form = this.fb.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    password: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*\d)(?=.*[a-z]).+$/)
+      ]
+    ],
     birthDate: ['', [Validators.required]],
     phoneNumber: [''],
     postalCode: ['']
   });
 
   async submit(): Promise<void> {
+    this.submitted.set(true);
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      return;
+    }
+
+    const birth = this.form.controls.birthDate.value;
+    if (birth > this.maxBirthDate()) {
+      this.errorMessage.set('Du må være minst 13 år for å opprette konto.');
       return;
     }
 

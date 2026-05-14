@@ -6,14 +6,15 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
   template: `
     <svg [attr.width]="size()" [attr.height]="size()" viewBox="0 0 24 24" aria-hidden="true">
       <defs>
-        <linearGradient id="lg-moon" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id="lg-spark" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stop-color="var(--color-gold)" />
           <stop offset="1" stop-color="var(--color-gold-deep)" />
         </linearGradient>
       </defs>
-      <path d="M16.5 4a9 9 0 1 0 3.5 14.5A8 8 0 0 1 16.5 4z" fill="url(#lg-moon)" />
-      <circle cx="6" cy="6" r="1" fill="var(--color-gold)" opacity="0.7" />
-      <circle cx="20" cy="11" r="0.8" fill="var(--color-gold)" opacity="0.5" />
+      <path
+        d="M12 2 L13.6 9.2 C13.85 10.3 14.7 11.15 15.8 11.4 L23 13 L15.8 14.6 C14.7 14.85 13.85 15.7 13.6 16.8 L12 24 L10.4 16.8 C10.15 15.7 9.3 14.85 8.2 14.6 L1 13 L8.2 11.4 C9.3 11.15 10.15 10.3 10.4 9.2 Z"
+        fill="url(#lg-spark)"
+      />
     </svg>
     <span class="word" [style.fontSize.px]="textSize()">smaa<em>jobb</em></span>
   `,

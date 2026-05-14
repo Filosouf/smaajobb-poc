@@ -113,6 +113,12 @@
                 <ui-rating [value]="worker.averageRating" [count]="worker.completedJobs" />
               }
             </div>
+            @if (canMessageList() && (j.status === 'Assigned' || j.status === 'AwaitingConfirmation')) {
+              <a href="#messages" class="message-jump" (click)="scrollToMessages($event)">
+                <ui-icon name="message" [size]="16" />
+                Åpne chat
+              </a>
+            }
           </div>
         </ui-card>
       }
@@ -199,6 +205,12 @@
       @if (isOwner() && applicationsList().length > 0) {
         <section>
           <h3 class="section-title">Søknader · {{ applicationsList().length }}</h3>
+          @if (j.status === 'Open' && hasPendingApplications()) {
+            <div class="chat-hint">
+              <ui-icon name="message" [size]="16" />
+              <span>Chat med søkeren åpnes etter at du har akseptert søknaden. Forhandlinger om pris og dato kommer i en senere versjon.</span>
+            </div>
+          }
           <div class="apps-list">
             @for (app of applicationsList(); track app.id) {
               <ui-card padding="lg">
@@ -237,8 +249,14 @@
 
       <!-- Messages -->
       @if (canMessageList()) {
-        <section>
-          <h3 class="section-title">Meldinger</h3>
+        <section id="messages">
+          <h3 class="section-title">
+            <ui-icon name="message" [size]="18" />
+            Meldinger
+            @if (messagesList().length > 0) {
+              <span class="msg-count">{{ messagesList().length }}</span>
+            }
+          </h3>
           <ui-card padding="lg">
             @if (messagesList().length === 0) {
               <p class="muted" style="margin: 0 0 12px">Ingen meldinger ennå.</p>

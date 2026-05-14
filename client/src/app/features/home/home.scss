@@ -28,16 +28,8 @@
   max-width: 560px;
 }
 
-.hero-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-gold);
-  letter-spacing: 0.12em;
-}
-
 .hero-title {
-  margin: 8px 0 12px;
+  margin: 0 0 12px;
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 500;
@@ -60,24 +52,88 @@
   flex-wrap: wrap;
 }
 
-.hero-stars span {
+.hero-stars {
   position: absolute;
-  width: 3px;
-  height: 3px;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-stars .nebula {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 55%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at 85% 30%, rgba(232, 178, 92, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 75% 80%, rgba(139, 95, 191, 0.06) 0%, transparent 55%);
+  filter: blur(3px);
+  pointer-events: none;
+}
+
+.hero-stars .star {
+  position: absolute;
   border-radius: 999px;
+  background: rgba(245, 234, 208, 0.75);
+  animation: twinkle var(--d, 3s) ease-in-out var(--delay, 0s) infinite;
+}
+
+.hero-stars .star.gold {
   background: var(--color-gold);
   opacity: 0.7;
-  animation: twinkle var(--d, 2s) ease-in-out infinite alternate;
+}
+
+.hero-stars .star.sm {
+  width: 2px;
+  height: 2px;
+}
+
+.hero-stars .sparkle {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  fill: var(--color-gold);
+  opacity: 0.55;
+  animation: sparkle-pulse var(--d, 5s) ease-in-out var(--delay, 0s) infinite;
+  transform-origin: center;
+}
+
+.hero-stars .hero-sparkle-2 {
+  fill: rgba(245, 234, 208, 0.85);
+  width: 14px;
+  height: 14px;
 }
 
 @keyframes twinkle {
-  from {
-    opacity: 0.2;
-    transform: scale(0.6);
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.8);
   }
-  to {
-    opacity: 0.9;
-    transform: scale(1.2);
+  50% {
+    opacity: 0.85;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes sparkle-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-stars .star,
+  .hero-stars .sparkle {
+    animation: none;
+    opacity: 0.5;
   }
 }
 

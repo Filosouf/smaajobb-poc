@@ -70,7 +70,7 @@ public class AuthController : ControllerBase
 
         var result = await _userManager.CreateAsync(user, req.Password);
         if (!result.Succeeded)
-            return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+            return BadRequest(new { errors = result.Errors.Select(TranslateIdentityError) });
 
         return await IssueTokensAsync(user);
     }
@@ -174,7 +174,7 @@ public class AuthController : ControllerBase
 
         var result = await _userManager.ResetPasswordAsync(user, decodedToken, req.NewPassword);
         if (!result.Succeeded)
-            return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+            return BadRequest(new { errors = result.Errors.Select(TranslateIdentityError) });
 
         return NoContent();
     }
@@ -228,4 +228,20 @@ public class AuthController : ControllerBase
         if (at < birth.AddYears(age)) age--;
         return age;
     }
+
+    private static string TranslateIdentityError(IdentityError error) => error.Code switch
+    {
+        "PasswordTooShort" => "Passordet må være minst 8 tegn.",
+        "PasswordRequiresDigit" => "Passordet må inneholde minst ett tall.",
+        "PasswordRequiresLower" => "Passordet må inneholde minst en liten bokstav.",
+        "PasswordRequiresUpper" => "Passordet må inneholde minst en stor bokstav.",
+        "PasswordRequiresNonAlphanumeric" => "Passordet må inneholde minst ett spesialtegn.",
+        "PasswordRequiresUniqueChars" => "Passordet må inneholde flere ulike tegn.",
+        "DuplicateEmail" or "DuplicateUserName" => "En bruker med denne e-postadressen finnes allerede.",
+        "InvalidEmail" => "E-postadressen er ikke gyldig.",
+        "InvalidUserName" => "Brukernavnet er ikke gyldig.",
+        "PasswordMismatch" => "Feil passord.",
+        "InvalidToken" => "Lenken er ugyldig eller utløpt.",
+        _ => error.Description
+    };
 }

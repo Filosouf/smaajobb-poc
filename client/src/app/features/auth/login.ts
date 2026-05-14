@@ -17,14 +17,16 @@ export class LoginPage {
   private readonly router = inject(Router);
 
   readonly submitting = signal(false);
+  readonly submitted = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]]
+    password: ['', [Validators.required]]
   });
 
   async submit(): Promise<void> {
+    this.submitted.set(true);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

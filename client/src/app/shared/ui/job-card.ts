@@ -50,14 +50,22 @@ import { UiIcon } from './ui-icon';
         text-decoration: none;
         color: inherit;
         transition:
-          transform 0.12s ease,
-          border-color 0.12s ease,
-          box-shadow 0.12s ease;
+          transform 0.18s ease,
+          border-color 0.18s ease,
+          box-shadow 0.18s ease;
       }
       .card:hover {
-        border-color: var(--color-line-strong);
-        box-shadow: var(--shadow-mid);
-        transform: translateY(-1px);
+        border-color: var(--color-gold);
+        box-shadow:
+          0 12px 32px rgba(14, 18, 53, 0.45),
+          0 0 0 1px rgba(232, 178, 92, 0.35);
+        transform: translateY(-4px);
+      }
+      .card:hover .title {
+        color: var(--color-gold);
+      }
+      .card:hover .photo {
+        transform: scale(1.05);
       }
       .image {
         height: 140px;
@@ -83,6 +91,7 @@ import { UiIcon } from './ui-icon';
         height: 100%;
         object-fit: cover;
         display: block;
+        transition: transform 0.3s ease;
       }
       .image-label {
         font-family: var(--font-mono);
@@ -116,6 +125,7 @@ import { UiIcon } from './ui-icon';
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
+        transition: color 0.18s ease;
       }
       .price {
         font-family: var(--font-sans);

@@ -5,35 +5,70 @@
         @case ('checking') {
           <div class="spinner"></div>
           <h1 class="title">Bekrefter betaling …</h1>
-          <p class="sub">Forsøk {{ attempts() }} av 5</p>
+          <p class="sub">Forsøk {{ attempts() }} av 5. Vi venter på Stripe.</p>
         }
 
         @case ('paid') {
           <div class="icon ok"><ui-icon name="check" [size]="40" /></div>
           <h1 class="title">Betaling bekreftet.</h1>
           <p class="sub">Jobben er nå publisert og synlig for arbeidere.</p>
-          <a routerLink="/jobs/mine" class="link-reset">
-            <ui-button variant="primary" size="lg">Gå til mine jobber</ui-button>
-          </a>
+          @if (isAuthed()) {
+            <a routerLink="/jobs/mine" class="link-reset">
+              <ui-button variant="primary" size="lg">Gå til mine jobber</ui-button>
+            </a>
+          } @else {
+            <p class="sub">Du er logget ut. Logg inn for å se jobben.</p>
+            <a routerLink="/login" class="link-reset">
+              <ui-button variant="primary" size="lg">Logg inn</ui-button>
+            </a>
+          }
         }
 
         @case ('unpaid') {
           <div class="icon wait"><ui-icon name="clock" [size]="36" /></div>
-          <h1 class="title">Betaling ikke bekreftet.</h1>
+          <h1 class="title">Betaling ikke bekreftet ennå.</h1>
           <p class="sub">
-            Betalingen er sannsynligvis under behandling. Sjekk «Mine jobber» om et øyeblikk.
+            Stripe har ikke bekreftet betalingen innen tidsrammen. Den kan fortsatt
+            være under behandling. Sjekk «Mine jobber» om et øyeblikk — statusen
+            oppdateres automatisk når Stripe melder tilbake.
           </p>
-          <a routerLink="/jobs/mine" class="link-reset">
-            <ui-button variant="secondary" size="lg">Til mine jobber</ui-button>
-          </a>
+          @if (isAuthed()) {
+            <a routerLink="/jobs/mine" class="link-reset">
+              <ui-button variant="secondary" size="lg">Til mine jobber</ui-button>
+            </a>
+          } @else {
+            <a routerLink="/login" class="link-reset">
+              <ui-button variant="secondary" size="lg">Logg inn</ui-button>
+            </a>
+          }
+        }
+
+        @case ('error') {
+          <div class="icon err"><ui-icon name="cancel" [size]="36" /></div>
+          <h1 class="title">Vi fikk ikke svar fra Stripe.</h1>
+          <p class="sub">
+            Noe gikk galt da vi prøvde å sjekke betalingsstatus.
+            @if (errorDetail()) {
+              <br><small>{{ errorDetail() }}</small>
+            }
+          </p>
+          @if (isAuthed()) {
+            <a routerLink="/jobs/mine" class="link-reset">
+              <ui-button variant="secondary" size="lg">Til mine jobber</ui-button>
+            </a>
+          } @else {
+            <a routerLink="/login" class="link-reset">
+              <ui-button variant="secondary" size="lg">Logg inn</ui-button>
+            </a>
+          }
         }
 
         @case ('missing') {
           <div class="icon err"><ui-icon name="cancel" [size]="36" /></div>
-          <h1 class="title">Ingen session-id.</h1>
-          <p class="sub">Lenken mangler nødvendig informasjon.</p>
-          <a routerLink="/jobs/mine" class="link-reset">
-            <ui-button variant="secondary" size="lg">Til mine jobber</ui-button>
+          <h1 class="title">Mangler betalings-id.</h1>
+          <p class="sub">Lenken inneholder ikke nødvendig informasjon for å sjekke status.</p>
+          <a routerLink="/login" class="link-reset">
+            <ui-button variant="secondary" size="lg">Til innlogging</ui-button>
           </a>
         }
       }
