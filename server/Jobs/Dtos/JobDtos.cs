@@ -28,7 +28,10 @@ public record JobListItem(
     string PostalCode,
     string City,
     JobStatus Status,
-    DateTime? PublishedAt);
+    DateTime? PublishedAt,
+    string? PrimaryImageUrl);
+
+public record JobImageDto(Guid Id, string Url, int DisplayOrder);
 
 public record JobDetail(
     Guid Id,
@@ -51,7 +54,8 @@ public record JobDetail(
     DateTime CreatedAt,
     DateTime? PublishedAt,
     DateTime? AssignedAt,
-    DateTime? CompletedAt);
+    DateTime? CompletedAt,
+    IReadOnlyList<JobImageDto> Images);
 
 public record CreateJobRequest(
     [Required] int CategoryId,
@@ -63,7 +67,8 @@ public record CreateJobRequest(
     [Required] DeadlineType DeadlineType,
     DateTime? DeadlineDate,
     [Range(1, 365)] int? DeadlineDays,
-    [Required, RegularExpression(@"^\d{4}$", ErrorMessage = "Postnummer må være 4 siffer.")] string PostalCode);
+    [Required, RegularExpression(@"^\d{4}$", ErrorMessage = "Postnummer må være 4 siffer.")] string PostalCode,
+    IReadOnlyList<string>? ImageBlobKeys);
 
 public record UpdateJobRequest(
     [Required] int CategoryId,
@@ -75,7 +80,8 @@ public record UpdateJobRequest(
     [Required] DeadlineType DeadlineType,
     DateTime? DeadlineDate,
     [Range(1, 365)] int? DeadlineDays,
-    [Required, RegularExpression(@"^\d{4}$")] string PostalCode);
+    [Required, RegularExpression(@"^\d{4}$")] string PostalCode,
+    IReadOnlyList<string>? ImageBlobKeys);
 
 public record JobFilter(
     int? CategoryId,

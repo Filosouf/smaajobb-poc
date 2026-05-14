@@ -27,6 +27,12 @@ export interface PersonRef {
   completedJobs: number;
 }
 
+export interface JobImageDto {
+  id: string;
+  url: string;
+  displayOrder: number;
+}
+
 export interface JobListItem {
   id: string;
   title: string;
@@ -39,6 +45,7 @@ export interface JobListItem {
   city: string;
   status: JobStatus;
   publishedAt: string | null;
+  primaryImageUrl: string | null;
 }
 
 export interface JobDetail {
@@ -63,6 +70,7 @@ export interface JobDetail {
   publishedAt: string | null;
   assignedAt: string | null;
   completedAt: string | null;
+  images: JobImageDto[];
 }
 
 export interface JobInput {
@@ -76,6 +84,7 @@ export interface JobInput {
   deadlineDate: string | null;
   deadlineDays: number | null;
   postalCode: string;
+  imageBlobKeys: string[];
 }
 
 export interface JobSearchParams {

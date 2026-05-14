@@ -75,6 +75,10 @@
         <input class="ui-control" type="text" formControlName="postalCode" maxlength="4" placeholder="5000" style="max-width: 140px" />
       </ui-field>
 
+      <ui-field label="Bilder" hint="Opptil 5 bilder. Det første blir hovedbildet i jobblisten.">
+        <ui-image-upload [value]="images()" (valueChange)="images.set($event)" [max]="5" />
+      </ui-field>
+
       <div class="form-actions">
         <a routerLink="/jobs/mine" class="link-reset">
           <ui-button variant="ghost" size="md">Avbryt</ui-button>

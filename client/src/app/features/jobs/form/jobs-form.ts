@@ -12,6 +12,7 @@ import { UiButton } from '../../../shared/ui/ui-button';
 import { UiCard } from '../../../shared/ui/ui-card';
 import { UiField } from '../../../shared/ui/ui-form-field';
 import { UiIcon } from '../../../shared/ui/ui-icon';
+import { JobImageEntry, UiImageUpload } from '../../../shared/ui/ui-image-upload';
 import { JobsService } from '../jobs.service';
 import {
   CategoryDto,
@@ -28,7 +29,8 @@ import {
     UiButton,
     UiCard,
     UiField,
-    UiIcon
+    UiIcon,
+    UiImageUpload
   ],
   templateUrl: './jobs-form.html',
   styleUrl: './jobs-form.scss'
@@ -45,6 +47,7 @@ export class JobsFormPage implements OnInit {
   readonly submitting = signal(false);
   readonly loadError = signal<string | null>(null);
   readonly submitError = signal<string | null>(null);
+  readonly images = signal<JobImageEntry[]>([]);
 
   readonly form = this.fb.nonNullable.group({
     categoryId: ['', Validators.required],
@@ -86,6 +89,14 @@ export class JobsFormPage implements OnInit {
           deadlineDays: j.deadlineDays ?? 7,
           postalCode: j.postalCode
         });
+        // Eksisterende bilder — vi har ikke blobKey, men URL-en peker
+        // til /uploads/{key} så vi kan utlede key fra URL-en.
+        this.images.set(
+          j.images.map((img) => ({
+            blobKey: img.url.replace(/^\/uploads\//, ''),
+            publicUrl: img.url
+          }))
+        );
       } catch {
         this.loadError.set('Kunne ikke laste jobben.');
       }
@@ -112,7 +123,8 @@ export class JobsFormPage implements OnInit {
           ? new Date(v.deadlineDate).toISOString()
           : null,
       deadlineDays: v.deadlineType === 'WithinDays' ? Number(v.deadlineDays) : null,
-      postalCode: v.postalCode
+      postalCode: v.postalCode,
+      imageBlobKeys: this.images().map((i) => i.blobKey)
     };
 
     this.submitting.set(true);

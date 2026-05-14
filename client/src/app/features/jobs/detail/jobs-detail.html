@@ -8,7 +8,14 @@
 } @else if (job(); as j) {
   <div class="detail">
     <!-- Hero / image -->
-    <div class="hero" [class.tone-gold]="(j.categoryId % 3) === 0" [class.tone-teal]="(j.categoryId % 3) === 1" [class.tone-plum]="(j.categoryId % 3) === 2">
+    <div class="hero"
+      [class.tone-gold]="j.images.length === 0 && (j.categoryId % 3) === 0"
+      [class.tone-teal]="j.images.length === 0 && (j.categoryId % 3) === 1"
+      [class.tone-plum]="j.images.length === 0 && (j.categoryId % 3) === 2">
+      @if (j.images.length > 0) {
+        <img class="hero-photo" [src]="j.images[0].url" alt="" />
+        <div class="hero-shade"></div>
+      }
       <div class="hero-actions">
         <a routerLink="/jobs" class="back-btn">
           <ui-icon name="chev-left" [size]="22" />
@@ -21,6 +28,14 @@
         <span class="hero-cat">{{ j.categoryName }}</span>
       </div>
     </div>
+
+    @if (j.images.length > 1) {
+      <div class="image-strip">
+        @for (img of j.images.slice(1); track img.id) {
+          <img [src]="img.url" alt="" />
+        }
+      </div>
+    }
 
     <div class="content">
       <!-- Title -->

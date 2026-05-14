@@ -12,6 +12,9 @@ import { UiIcon } from './ui-icon';
   template: `
     <a class="card" [routerLink]="['/jobs', item().id]">
       <div class="image" [class]="'tone-' + tone()">
+        @if (item().primaryImageUrl; as src) {
+          <img [src]="src" alt="" class="photo" />
+        }
         <span class="image-label">{{ item().categoryName.toLowerCase() }}</span>
       </div>
       <div class="body">
@@ -62,6 +65,7 @@ import { UiIcon } from './ui-icon';
         align-items: flex-end;
         padding: 10px;
         position: relative;
+        overflow: hidden;
       }
       .image.tone-gold {
         background: repeating-linear-gradient(135deg, #2a2658 0 12px, #3a3268 12px 24px);
@@ -72,13 +76,23 @@ import { UiIcon } from './ui-icon';
       .image.tone-plum {
         background: repeating-linear-gradient(135deg, #2b1a4e 0 12px, #3d2868 12px 24px);
       }
+      .photo {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
       .image-label {
         font-family: var(--font-mono);
         font-size: 10px;
-        color: rgba(245, 234, 208, 0.55);
-        background: rgba(0, 0, 0, 0.28);
+        color: rgba(245, 234, 208, 0.75);
+        background: rgba(0, 0, 0, 0.5);
         padding: 2px 6px;
         border-radius: 4px;
+        position: relative;
+        z-index: 1;
       }
       .body {
         padding: 14px;

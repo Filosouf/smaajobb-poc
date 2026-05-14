@@ -8,6 +8,82 @@ public static class DbSeeder
     public static async Task SeedAsync(AppDbContext db)
     {
         await SeedCategoriesAsync(db);
+        await SeedPostalCodesAsync(db);
+        await BackfillJobCitiesAsync(db);
+    }
+
+    private static async Task BackfillJobCitiesAsync(AppDbContext db)
+    {
+        var jobs = await db.JobListings
+            .Where(j => j.City == "")
+            .ToListAsync();
+        if (jobs.Count == 0) return;
+
+        var codes = jobs.Select(j => j.PostalCode).Distinct().ToList();
+        var lookup = await db.PostalCodes
+            .Where(p => codes.Contains(p.Code))
+            .ToDictionaryAsync(p => p.Code, p => p.City);
+
+        foreach (var j in jobs)
+        {
+            if (lookup.TryGetValue(j.PostalCode, out var city))
+                j.City = city;
+        }
+        await db.SaveChangesAsync();
+    }
+
+    private static async Task SeedPostalCodesAsync(AppDbContext db)
+    {
+        if (await db.PostalCodes.AnyAsync())
+            return;
+
+        var path = Path.Combine(AppContext.BaseDirectory, "Data", "postal-codes.tsv");
+        if (!File.Exists(path))
+            return;
+
+        var batch = new List<PostalCode>(capacity: 6000);
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var line in await File.ReadAllLinesAsync(path))
+        {
+            var parts = line.Split('\t');
+            if (parts.Length < 4) continue;
+            var code = parts[0].Trim();
+            if (code.Length != 4 || !seen.Add(code)) continue;
+            batch.Add(new PostalCode
+            {
+                Code = code,
+                City = ToTitleCase(parts[1].Trim()),
+                Municipality = ToTitleCase(parts[3].Trim())
+            });
+        }
+
+        if (batch.Count == 0) return;
+
+        db.PostalCodes.AddRange(batch);
+        await db.SaveChangesAsync();
+    }
+
+    private static string ToTitleCase(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return s;
+        // Bring-data er all-caps; gjør pen "Title Case" med spesialhåndtering av norske bindestrek-navn
+        var lower = s.ToLowerInvariant();
+        var sb = new System.Text.StringBuilder(lower.Length);
+        var capitalizeNext = true;
+        foreach (var ch in lower)
+        {
+            if (capitalizeNext && char.IsLetter(ch))
+            {
+                sb.Append(char.ToUpperInvariant(ch));
+                capitalizeNext = false;
+            }
+            else
+            {
+                sb.Append(ch);
+                if (ch == ' ' || ch == '-' || ch == '/' || ch == '(') capitalizeNext = true;
+            }
+        }
+        return sb.ToString();
     }
 
     private static async Task SeedCategoriesAsync(AppDbContext db)

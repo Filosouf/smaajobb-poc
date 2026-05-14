@@ -8,6 +8,8 @@ using SmaaJobb.Api.Data;
 using SmaaJobb.Api.Domain.Entities;
 using SmaaJobb.Api.Email;
 using SmaaJobb.Api.Payments;
+using SmaaJobb.Api.Storage;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +20,7 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"))
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("App"));
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+builder.Services.Configure<BlobStorageSettings>(builder.Configuration.GetSection("BlobStorage"));
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
     ?? throw new InvalidOperationException("Missing Jwt configuration section.");
 
@@ -73,6 +76,7 @@ builder.Services.AddScoped<SmaaJobb.Api.Messages.IMessageService, SmaaJobb.Api.M
 builder.Services.AddScoped<SmaaJobb.Api.Ratings.IRatingService, SmaaJobb.Api.Ratings.RatingService>();
 builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddSingleton<IBlobStorage, LocalDiskBlobStorage>();
 
 // --- CORS (dev only — prod serverer Angular og API fra samme origin) ---
 builder.Services.AddCors(options =>
@@ -104,6 +108,20 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseHttpsRedirection();
+}
+
+// --- Static file serving for opplastede bilder ---
+{
+    var blobSettings = app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<BlobStorageSettings>>().Value;
+    var rootPath = Path.IsPathRooted(blobSettings.LocalPath)
+        ? blobSettings.LocalPath
+        : Path.Combine(app.Environment.ContentRootPath, blobSettings.LocalPath);
+    Directory.CreateDirectory(rootPath);
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(rootPath),
+        RequestPath = blobSettings.PublicPath.TrimEnd('/')
+    });
 }
 
 app.UseAuthentication();
